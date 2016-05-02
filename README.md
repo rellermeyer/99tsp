@@ -4,7 +4,7 @@ TODO: add a description
 
 ## Languages
 
-TODO: list of available languages
+_TODO: list of available languages_
 
 ## Algorithms
 
@@ -14,4 +14,4 @@ Simulated Annealing (sa)
 Genetic (gen)
 Neural Network (neural)
 
-TODO: extend the list of used algorithms
+_TODO: extend the list of used algorithms_
