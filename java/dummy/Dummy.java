@@ -4,6 +4,6 @@ class Dummy {
       System.err.println("99 TSP - No input file");
       System.exit(1);
     }
-    System.out.println("99 TSP - Input file is " + args[0]);
+    System.out.println("99 TSP - Input file is " + args[0] + ".tsp or .xml");
   }
 }
