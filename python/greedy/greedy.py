@@ -119,7 +119,7 @@ def parseFile(filepath):
     with open(filepath) as datafile:
         for line in datafile:
             if isDataLine(line):
-                data.append(tuple([int(x) for x in line.split()]))
+                data.append(tuple([float(x) for x in line.split()]))
 
     return data
 
@@ -136,7 +136,7 @@ def main():
 
     data = parseFile(sys.argv[1])
     nodes, distance = solveGreedyTSP(data)
-    node_ids = [nodeid for nodeid, _, _ in nodes]
+    node_ids = [int(nodeid) for nodeid, _, _ in nodes]
 
     print(node_ids)
     print(distance)
