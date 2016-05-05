@@ -1,12 +1,12 @@
 
 """
-Greed algorithm for TSP
-
-Requires .tsp file format.
-
 Josh Kelle
 May 5, 2016
 CS 345
+
+Greed algorithm for TSP.
+
+Assumes input file is .tsp format.
 
 """
 
@@ -74,7 +74,7 @@ def solveGreedyTSP(data):
         if min_dist is None or total_distance < min_dist:
             best_path = visited_nodes
             min_dist = total_distance
-            print("starting at node {i} gives a distance of {d}".format(i=start_node[0], d=total_distance))
+            # print("starting at node {i} gives a distance of {d}".format(i=start_node[0], d=total_distance))
 
     return best_path, min_dist
 
@@ -136,10 +136,16 @@ def main():
 
     data = parseFile(sys.argv[1])
     nodes, distance = solveGreedyTSP(data)
-    node_ids = [int(nodeid) for nodeid, _, _ in nodes]
 
-    print(node_ids)
-    print(distance)
+    # print output
+    print("NAME : ???")
+    print("TYPE : TOUR")
+    print("DIMENSION : {}".format(len(nodes)))
+    print("TOUR_SECTION")
+    for nodeid, _, _ in nodes:
+        print(int(nodeid))
+    print(-1)
+    print()
 
 
 if __name__ == '__main__':
