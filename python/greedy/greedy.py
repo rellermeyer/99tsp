@@ -45,17 +45,18 @@ def getNearestNode(remaining_nodes, current_node):
 def solveGreedyTSP(data):
     """
     Args:
-        data: a list of lists of 3 ints.
+        data: a list of triples of ints.
                 [
-                    [nodeid, x, y],
-                    [nodeid, x, y],
+                    (nodeid, x, y),
+                    (nodeid, x, y),
                     ...
-                    [nodeid, x, y]
+                    (nodeid, x, y)
                 ]
 
     Returns:
-        solution: list of nodeids representing the order in which nodes should
-            be visited.
+        best_path: list of (nodeid, x, y) triples in the order in which nodes
+            should be visited.
+        min_dist: The total distance of best_path
     """
     best_path = None
     min_dist = None
