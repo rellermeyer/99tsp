@@ -14,3 +14,6 @@ run the command on the terminal/ command line,
 where example.tsp is the file you would like to parse. 
 
 You must have swipl installing on your computer in order to run this.
+
+
+Im limited in knowledge of prolog, so I do not know how to/ if it is possible to make a make-file for this solution at the moment, sorry
