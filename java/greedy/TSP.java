@@ -101,21 +101,6 @@ public class TSP
             {
             	currentNode = solutionNode.get(solutionNode.size() - 1);
             	Node nearestNeighbor = getNearestNeighbor(currentNode, nodes);
-                //Node nearestNeighbor = null;
-                /*
-                double minDistance = Double.MAX_VALUE;
-                for (int k = 0; k < nodes.size(); k++)
-                {
-                    Node neighbor = nodes.get(k);
-                    double dist = distance(currentNode, neighbor);
-                    //NOTE: using dist<= minDistance in the below conditional can yield different solution
-                    if (dist < minDistance)
-                    {
-                        minDistance = dist;
-                        nearestNeighbor = neighbor;
-                    }
-                } 
-                */
                 double minDistance = distance(currentNode, nearestNeighbor);
                 solutionNode.add(nearestNeighbor);
                 nodes.remove(nearestNeighbor);
@@ -127,7 +112,13 @@ public class TSP
                 minTotalDistance = totalDistance;
                 optSolutionNode = solutionNode;
             }   
-        } 
+        }
+        /*
+        Print out the solution
+        Line 1: total distance of solution cycle
+        Next Lines: print out nodes in order of cycle path
+        Final Line: print out -1, indicating end of solution output, consistent with a280.opt.tour file
+        */ 
         System.out.println("Distance: " + minTotalDistance);
         for (int i = 0; i < optSolutionNode.size(); i++)
         {
@@ -136,6 +127,9 @@ public class TSP
         System.out.println(-1);
 	}
 
+    /*
+    Utility function to obtain the nearest neighbor
+    */
     public static Node getNearestNeighbor(Node currentNode, ArrayList<Node> nodes)
     {
         Node nearestNeighbor = null;
