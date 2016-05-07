@@ -4,29 +4,16 @@ This solution is supposed to be of a Simulated Annealing Algorithm
 
 
 
-in order to run the solution at the moment on Windows, 
+To run the program right now, 
 
-You have two choices. 
+run the command on the terminal/ command line, 
 
-You have to load the file using consult('testing.pl'),
+ swipl  main.pl -t main --quiet -- example.tsp
+ 
+ 
+where example.tsp is the file you would like to parse. 
 
-and then running the command start(File, Temp, Temp_to_reach, and constant) on the Swi-Prolog terminal,
-
-where the File is the path that the file is held in,
-
-
-and temp, temp_to_reach, and constant are numbers for how long you want the program to run until.
+You must have swipl installing on your computer in order to run this.
 
 
-OR you can 
-
-load test_example.pl, 
-
-and call test_example. on the swi command line
-
-
-Both of these choices will output 
-
-the distance 
-
-and the path the algorithm thought of as the current solution 
+Im limited in knowledge of prolog, so I do not know how to/ if it is possible to make a make-file for this solution at the moment, sorry

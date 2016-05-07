@@ -1,3 +1,6 @@
+% gets prolog to work from command line
+
+:- initialization main. 
 
 
 %Pass the File location you want to read in,
@@ -7,18 +10,21 @@
 
 %i.e temp start is 1, temp reach is 1000000, constant is 4
 
-start(File,Temp,Temp_Min,Alpha) :-
+main:-
 
-b_setval('Temp', Temp),
-b_setval('Temp_min' , Temp_Min),
-b_setval('A', Alpha),
+b_setval('Temp', 1),
+b_setval('Temp_min' , 1000000),
+b_setval('A', 1.9),
 b_setval('mincost', 1000000),
 b_setval('currentcost', 0),
+%read in command lines
+  current_prolog_flag(argv, AllArgs),
+  append(_, [-- | File1], AllArgs),
+nth0(0, File1, File2),
 
-
+atom_string(File, File2),
 
 %open the file and disregard extra input, im too lazy to
-
 open(File,read,ID),
 read_line_to_codes(ID,_),
 read_line_to_codes(ID,_),
@@ -55,7 +61,9 @@ find_Optimal(Solution),
 
  %close input and output streams
  close(X),
- close(ID).
+ close(ID),
+ halt.
+
 
 
 printlist([], _).
