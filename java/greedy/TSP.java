@@ -11,35 +11,35 @@ import java.util.*;
 import java.io.*;
 public class TSP
 {
-	/*    
-	Node helper class
-	We create a Node to store the node number, and x,y cartesian coordinates 
-	from the input file
-	*/
-	public static class Node
-	{
-		public int nodeNum;
-		public int x;
-		public int y;
-		public Node(int nodeNum, int x, int y)
-		{
-			this.nodeNum = nodeNum;
-			this.x = x;
-			this.y = y;
-		}
-	}
+    /*    
+    Node helper class
+    We create a Node to store the node number, and x,y cartesian coordinates 
+    from the input file
+    */
+    public static class Node
+    {
+        public int nodeNum;
+        public int x;
+        public int y;
+        public Node(int nodeNum, int x, int y)
+        {
+            this.nodeNum = nodeNum;
+            this.x = x;
+            this.y = y;
+        }
+    }
 
-	public static void main (String args[])
-	{
+    public static void main (String args[])
+    {
         try
         {
             //Take filename as command line argument
             String fileName = args[0];
-		    ArrayList<Node> nodes = new ArrayList<Node>();
-		    //parse creates node objects and stores them in nodes
+            ArrayList<Node> nodes = new ArrayList<Node>();
+            //parse creates node objects and stores them in nodes
             parse(nodes, fileName);
             //implements the greedy TSP algorithm on given nodes
-		    solve(nodes);
+            solve(nodes);
         }
         catch (IOException e)
         {
@@ -47,46 +47,46 @@ public class TSP
         }
     }
 
-	//helper method to print the node number, along with its x and y coordinates 
-	public static void printNode(Node n)
-	{
-		System.out.println(n.nodeNum + " " + n.x + " " + n.y);
-	}
+    //helper method to print the node number, along with its x and y coordinates 
+    public static void printNode(Node n)
+    {
+        System.out.println(n.nodeNum + " " + n.x + " " + n.y);
+    }
 
-	/*
-	Parse the input file and store the parsed nodes into an arraylist
-	*/
-	public static void parse(ArrayList<Node> nodes, String fileName) throws IOException
-	{
-		Scanner input = new Scanner(new File(fileName));
-		//Parsing with a280tsp Format
-		/*Ignore header lines e.g.
-		NAME : a280
-		COMMENT : drilling problem (Ludwig)
-		TYPE : TSP
-		DIMENSION: 280
-		EDGE_WEIGHT_TYPE : EUC_2D
-		NODE_COORD_SECTION
-		*/
+    /*
+    Parse the input file and store the parsed nodes into an arraylist
+    */
+    public static void parse(ArrayList<Node> nodes, String fileName) throws IOException
+    {
+        Scanner input = new Scanner(new File(fileName));
+        //Parsing with a280tsp Format
+        /*Ignore header lines e.g.
+        NAME : a280
+        COMMENT : drilling problem (Ludwig)
+        TYPE : TSP
+        DIMENSION: 280
+        EDGE_WEIGHT_TYPE : EUC_2D
+        NODE_COORD_SECTION
+        */
         //Ignore the first 6 header lines
-		for (int i = 0; i < 6; i++)
-		{
-			input.nextLine();
-		}
+        for (int i = 0; i < 6; i++)
+        {
+            input.nextLine();
+        }
         //read in the values for each node
-		while (input.hasNextInt())
-		{
+        while (input.hasNextInt())
+        {
             /*
             read in node number, x coordinate, y coordinate
             e.g. 20 280 290
             */
-			Node node = new Node(input.nextInt(), input.nextInt(), input.nextInt());
-			nodes.add(node);
-		}
-	}
+            Node node = new Node(input.nextInt(), input.nextInt(), input.nextInt());
+            nodes.add(node);
+        }
+    }
 
-	public static void solve(ArrayList<Node> nodeList)
-	{
+    public static void solve(ArrayList<Node> nodeList)
+    {
         double minTotalDistance = Double.MAX_VALUE; 
         ArrayList<Node> optSolutionNode = new ArrayList<Node>();
         for (int i = 0; i < nodeList.size(); i++)
@@ -99,8 +99,8 @@ public class TSP
             nodes.remove(i);
             while(nodes.size() > 0)
             {
-            	currentNode = solutionNode.get(solutionNode.size() - 1);
-            	Node nearestNeighbor = getNearestNeighbor(currentNode, nodes);
+                currentNode = solutionNode.get(solutionNode.size() - 1);
+                Node nearestNeighbor = getNearestNeighbor(currentNode, nodes);
                 double minDistance = distance(currentNode, nearestNeighbor);
                 solutionNode.add(nearestNeighbor);
                 nodes.remove(nearestNeighbor);
@@ -122,10 +122,10 @@ public class TSP
         System.out.println("Distance: " + minTotalDistance);
         for (int i = 0; i < optSolutionNode.size(); i++)
         {
-        	System.out.println(optSolutionNode.get(i).nodeNum);
+            System.out.println(optSolutionNode.get(i).nodeNum);
         }
         System.out.println(-1);
-	}
+    }
 
     /*
     Utility function to obtain the nearest neighbor
@@ -139,7 +139,7 @@ public class TSP
             Node neighbor = nodes.get(k);
             double dist = distance(currentNode, neighbor);
             //NOTE: using dist<= minDistance in the below conditional can yield different solution
-            if (dist <= minDistance)
+            if (dist < minDistance)
             {
                 minDistance = dist;
                 nearestNeighbor = neighbor;
@@ -150,9 +150,9 @@ public class TSP
 
     /*
     Utility function to get the distance between two nodes
-	*/
+    */
     public static double distance(Node a, Node b)
-	{
-		return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-	}
+    {
+        return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    }
 }
