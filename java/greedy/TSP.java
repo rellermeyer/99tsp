@@ -29,12 +29,20 @@ public class TSP
 		}
 	}
 
-	public static void main (String args[]) throws IOException
+	public static void main (String args[])
 	{
-		ArrayList<Node> nodes = new ArrayList<Node>();
-		parse(nodes);
-		solve(nodes);
-	}
+        try
+        {
+            String fileName = args[0];
+		    ArrayList<Node> nodes = new ArrayList<Node>();
+		    parse(nodes, fileName);
+		    solve(nodes);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
 	//helper method to print the node number, along with its x and y coordinates 
 	public static void printNode(Node n)
@@ -45,9 +53,9 @@ public class TSP
 	/*
 	Parse the input file and store the parsed nodes into an arraylist
 	*/
-	public static void parse(ArrayList<Node> nodes) throws IOException
+	public static void parse(ArrayList<Node> nodes, String fileName) throws IOException
 	{
-		Scanner input = new Scanner(new File("a280.tsp"));
+		Scanner input = new Scanner(new File(fileName));
 		//Parsing with a280tsp Format
 		/*Ignore header lines e.g.
 		NAME : a280
@@ -89,7 +97,8 @@ public class TSP
                 {
                     Node neighbor = nodes.get(k);
                     double dist = distance(currentNode, neighbor);
-                    if (dist <= minDistance)
+                    //NOTE: using dist<= minDistance in the below conditional can yield different solution
+                    if (dist < minDistance)
                     {
                         minDistance = dist;
                         nearestNeighbor = neighbor;
@@ -106,11 +115,12 @@ public class TSP
                 optSolutionNode = solutionNode;
             }   
         } 
+        System.out.println("Distance: " + minTotalDistance);
         for (int i = 0; i < optSolutionNode.size(); i++)
         {
         	System.out.println(optSolutionNode.get(i).nodeNum);
         }
-        System.out.println("Distance: " + minTotalDistance);
+        System.out.println(-1);
 	}
 
 	public static double distance(Node a, Node b)
