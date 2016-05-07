@@ -146,6 +146,7 @@ def main():
     # print output
     print("NAME : ???")
     print("TYPE : TOUR")
+    print("TOTAL DISTANCE : {}".format(distance))
     print("DIMENSION : {}".format(len(nodes)))
     print("TOUR_SECTION")
     for nodeid, _, _ in nodes:
