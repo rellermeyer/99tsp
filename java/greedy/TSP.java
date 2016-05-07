@@ -33,9 +33,12 @@ public class TSP
 	{
         try
         {
+            //Take filename as command line argument
             String fileName = args[0];
 		    ArrayList<Node> nodes = new ArrayList<Node>();
-		    parse(nodes, fileName);
+		    //parse creates node objects and stores them in nodes
+            parse(nodes, fileName);
+            //implements the greedy TSP algorithm on given nodes
 		    solve(nodes);
         }
         catch (IOException e)
@@ -65,12 +68,18 @@ public class TSP
 		EDGE_WEIGHT_TYPE : EUC_2D
 		NODE_COORD_SECTION
 		*/
+        //Ignore the first 6 header lines
 		for (int i = 0; i < 6; i++)
 		{
 			input.nextLine();
 		}
+        //read in the values for each node
 		while (input.hasNextInt())
 		{
+            /*
+            read in node number, x coordinate, y coordinate
+            e.g. 20 280 290
+            */
 			Node node = new Node(input.nextInt(), input.nextInt(), input.nextInt());
 			nodes.add(node);
 		}
