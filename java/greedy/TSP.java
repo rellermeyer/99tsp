@@ -3,7 +3,7 @@ Prabhat Nagarajan (pmn356)
 May 5, 2016
 CS 345 - Rellermeyer
 
-Greedy Implmentation of the Traveling Salesman Problem
+Greedy Implementation of the Traveling Salesman Problem
 
 This implementation requires the .tsp format for input files
 */
