@@ -1,4 +1,5 @@
-MODULES:=java/dummy
+MODULES:=java/dummy 
+#cpp/greedy
 
 TSPLIB_MIRROR:=http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95
 TSPLIB:=$(TSPLIB_MIRROR)/tsp
@@ -7,7 +8,7 @@ TSPLIB_280:=a280
 
 DATA_DIR:=data
 
-TEST_FILE:=$(CURDIR)/$(DATA_DIR)/TSPLIB_280
+TEST_FILE:=$(CURDIR)/$(DATA_DIR)/$(TSPLIB_280)
 
 .PHONY: compile run clean depclean $(MODULES)
 
