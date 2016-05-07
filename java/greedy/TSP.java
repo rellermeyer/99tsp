@@ -88,29 +88,35 @@ public class TSP
     public static void solve(ArrayList<Node> nodeList)
     {
         double minTotalDistance = Double.MAX_VALUE; 
-        ArrayList<Node> optSolutionNode = new ArrayList<Node>();
+        ArrayList<Node> optSolutionNodes = new ArrayList<Node>();
+        
+        //We attempt the greedy solution on every possible start node
         for (int i = 0; i < nodeList.size(); i++)
         { 
+            //copy the list of nodes
             ArrayList<Node> nodes = new ArrayList<Node>(nodeList);
             double totalDistance = 0;
-            ArrayList<Node> solutionNode = new ArrayList<Node>();
+            //we build up the solution in the following list
+            ArrayList<Node> solutionNodes = new ArrayList<Node>();
+            //start node
             Node currentNode = nodeList.get(i);
-            solutionNode.add(currentNode);
+            solutionNodes.add(currentNode);
             nodes.remove(i);
             while(nodes.size() > 0)
             {
-                currentNode = solutionNode.get(solutionNode.size() - 1);
+                currentNode = solutionNodes.get(solutionNodes.size() - 1);
                 Node nearestNeighbor = getNearestNeighbor(currentNode, nodes);
                 double minDistance = distance(currentNode, nearestNeighbor);
-                solutionNode.add(nearestNeighbor);
+                solutionNodes.add(nearestNeighbor);
                 nodes.remove(nearestNeighbor);
                 totalDistance += minDistance;
             }
-            totalDistance += distance(solutionNode.get(solutionNode.size() - 1), solutionNode.get(0));
+            totalDistance += distance(solutionNodes.get(solutionNodes.size() - 1), solutionNodes.get(0));
+            //choose the solution with the optimal start node
             if (totalDistance < minTotalDistance)
             {
                 minTotalDistance = totalDistance;
-                optSolutionNode = solutionNode;
+                optSolutionNodes = solutionNodes;
             }   
         }
         /*
@@ -120,9 +126,9 @@ public class TSP
         Final Line: print out -1, indicating end of solution output, consistent with a280.opt.tour file
         */ 
         System.out.println("Distance: " + minTotalDistance);
-        for (int i = 0; i < optSolutionNode.size(); i++)
+        for (int i = 0; i < optSolutionNodes.size(); i++)
         {
-            System.out.println(optSolutionNode.get(i).nodeNum);
+            System.out.println(optSolutionNodes.get(i).nodeNum);
         }
         System.out.println(-1);
     }
