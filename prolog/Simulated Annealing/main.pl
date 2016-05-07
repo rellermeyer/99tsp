@@ -17,7 +17,7 @@ b_setval('Temp_min' , 1000000),
 b_setval('A', 1.9),
 b_setval('mincost', 1000000),
 b_setval('currentcost', 0),
-
+%read in command lines
   current_prolog_flag(argv, AllArgs),
   append(_, [-- | File1], AllArgs),
 nth0(0, File1, File2),
