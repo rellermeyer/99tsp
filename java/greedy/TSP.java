@@ -100,7 +100,9 @@ public class TSP
             while(nodes.size() > 0)
             {
             	currentNode = solutionNode.get(solutionNode.size() - 1);
-            	Node nearestNeighbor = null;
+            	Node nearestNeighbor = getNearestNeighbor(currentNode, nodes);
+                //Node nearestNeighbor = null;
+                /*
                 double minDistance = Double.MAX_VALUE;
                 for (int k = 0; k < nodes.size(); k++)
                 {
@@ -113,6 +115,8 @@ public class TSP
                         nearestNeighbor = neighbor;
                     }
                 } 
+                */
+                double minDistance = distance(currentNode, nearestNeighbor);
                 solutionNode.add(nearestNeighbor);
                 nodes.remove(nearestNeighbor);
                 totalDistance += minDistance;
@@ -132,7 +136,28 @@ public class TSP
         System.out.println(-1);
 	}
 
-	public static double distance(Node a, Node b)
+    public static Node getNearestNeighbor(Node currentNode, ArrayList<Node> nodes)
+    {
+        Node nearestNeighbor = null;
+        double minDistance = Double.MAX_VALUE;
+        for (int k = 0; k < nodes.size(); k++)
+        {
+            Node neighbor = nodes.get(k);
+            double dist = distance(currentNode, neighbor);
+            //NOTE: using dist<= minDistance in the below conditional can yield different solution
+            if (dist <= minDistance)
+            {
+                minDistance = dist;
+                nearestNeighbor = neighbor;
+            }
+        }
+        return nearestNeighbor;
+    }
+
+    /*
+    Utility function to get the distance between two nodes
+	*/
+    public static double distance(Node a, Node b)
 	{
 		return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 	}
