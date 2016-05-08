@@ -8,7 +8,7 @@ TSPLIB_280:=a280
 
 DATA_DIR:=data
 
-TEST_FILE:=$(CURDIR)/$(DATA_DIR)/TSPLIB_280
+TEST_FILE:=$(CURDIR)/$(DATA_DIR)/$(TSPLIB_280)
 
 .PHONY: compile run clean depclean $(MODULES)
 

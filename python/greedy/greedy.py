@@ -72,6 +72,11 @@ def solveGreedyTSP(data):
             remaining_nodes.remove(nearest_node)
             total_distance += distance
 
+        # account for distance from last node to first node
+        _, firstx, firsty = visited_nodes[0]
+        _, lastx, lasty = visited_nodes[-1]
+        total_distance += sqrt(dist2(firstx, firsty, lastx, lasty))
+
         if min_dist is None or total_distance < min_dist:
             best_path = visited_nodes
             min_dist = total_distance
@@ -141,6 +146,7 @@ def main():
     # print output
     print("NAME : ???")
     print("TYPE : TOUR")
+    print("TOTAL DISTANCE : {}".format(distance))
     print("DIMENSION : {}".format(len(nodes)))
     print("TOUR_SECTION")
     for nodeid, _, _ in nodes:
