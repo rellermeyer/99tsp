@@ -78,13 +78,15 @@ int Graph::getsize() {
 
 //returns start node of graph
 int Graph::getstart() {
+//here I decided to have an arbitrary start, instead of checking which starting point would provide the best greedy solution
+//It is possible to add a for loop into main "for i from getstart to getsize" and then pick the least cost route, but that adds an order to the complexity
 	return 1;
 }
 
 
 //finds the distance between node a and b
 double Graph::getdistance(int a, int b) {
-	if (a<1 || a>=num_nodes-1 || b<1 || b>=num_nodes-1) //not a valid node for this graph
+	if (a<1 || a>num_nodes || b<1 || b>num_nodes) //not a valid node for this graph
 		return -1;
 	else {
 		int xdist = array_of_nodes[a][X]-array_of_nodes[b][X];
@@ -103,7 +105,7 @@ int Graph::getclosest(int a) {
 	for (int i=1; i<=num_nodes;i++){
 		if (array_of_nodes[i][VIS]==0) { //not visited
 			double dist = getdistance(a,i); //get distance from a to i
-			if (dist < mindist)  {
+			if (dist <= mindist)  {
 				mindist = dist; //update min dist
 				minnode = i; //save closest node
 			}
