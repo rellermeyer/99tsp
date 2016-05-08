@@ -20,6 +20,13 @@ struct Element { //elements for linked list
 double distance(int x1, int y1, int x2, int y2){
 	return sqrt(((x2-x1)*(x2-x1))+((y2-y1)*(y2-y1)));
 }
+
+printList(struct Element * list){
+		while(list != NULL){
+		printf("id is: %d x is: %d y is: %d\n", list->node->nodeId, list->node->x, list->node->y);
+		list = list->next;
+	}
+}
 struct Element * parseFile(char * file){
 	FILE *filepointer;
 	char buf[255]; //lines for use in loop
@@ -63,7 +70,43 @@ struct Element * parseFile(char * file){
 	}
 
 	fclose(filepointer); //done with file
-	return currElement->next;
+	return currElement->next->next;
+}
+
+double getSolution(struct Element * list, struct Element * first, struct Element * justUsed, double sol){
+	double minDist = DBL_MAX;
+	struct Element * minElement;
+	struct Element * listCopy = list;
+	struct Element * returnList = list;
+	int skip = 0;
+	if(list->next == NULL)
+		return sol + distance(first->node->x,first->node->y,list->node->x,list->node->y);
+
+	if(justUsed == NULL){
+		list = list->next;
+		returnList = returnList->next;
+		justUsed = first;
+	}
+
+	while(list != NULL){
+		double dist = distance(justUsed->node->x,justUsed->node->y,list->node->x,list->node->y);
+		if(dist < minDist){
+			minDist = dist;
+			minElement = list;
+		}
+		list = list->next;
+	}
+	printf("Picked node %d\t at a cost of %f\n",minElement->node->nodeId,minDist);
+	if(listCopy == minElement){
+		skip = 1;
+		returnList = returnList->next;
+	}
+	while(listCopy->next != minElement && !skip){
+		listCopy = listCopy -> next;
+	}
+	//node is currently before the minElement, which we need to remove from the list.
+	listCopy->next = listCopy->next->next;
+	return getSolution(returnList,first,minElement,sol + minDist);
 }
 
 main(int argx, char **argv)
@@ -72,7 +115,7 @@ main(int argx, char **argv)
 	//argv[1] should be first arg, should be input file.
 	//!!!!! Perhaps implement multiple file names? 
 	struct Element * list;
-
+	double solution = 0.0;
 	if(argv[1] == NULL){ //check for input file
 		printf("99 TSP - No input file\n");
 		exit(1);
@@ -80,13 +123,7 @@ main(int argx, char **argv)
 
 	//parse input file
 	list = parseFile(argv[1]); //get linked list of vals
+	solution = getSolution(list, list, NULL, 0.0);
 
-	double minimumTotal = DBL_MAX;
-	printf("Random distance: %f", distance(-2,1,1,5));
-
-	/*while(list != NULL){
-		printf("id is: %d x is: %d y is: %d\n", list->node->nodeId, list->node->x, list->node->y);
-		list = list->next;
-	}*/
-	printf("The very end\n");
+	printf("The total distance is: %f\n", solution);
 }
