@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 module tsp #(
 	parameter PRECISION = 32,
-	parameter MAX_NODE_BITS = 9, // 2^this is the max # of nodes
+	parameter MAX_NODE_BITS = 13, // 2^this is the max # of nodes
 	parameter STRINGBUFFER_SIZE = 32,
 	parameter NUMBUF_NDIGITS_BITS = 4
 )(
@@ -99,6 +99,11 @@ assign best_distance_valid = (state_q == STATE_DONE_SOLVING);
 
 assign debug = {sqrt_inp_q[1:0], total_dist_q[5:0]};//total_dist_q[7:0];//string_len_q;//{state_q[2:0], has_read_prolog_q, nextstate_q[2:0], 1'b0};//nnodes_in_file_q[7:0];//((read_string_q>>((string_len_q-1)*8))&8'hFF);//{string_len_q[3:0],nnodes_in_file_q[3:0]};
 
+wire [PRECISION-1:0] dx, dy, dist_squared;
+assign dx = `X(doutb)-`X(douta);
+assign dy = `Y(doutb)-`Y(douta);
+assign dist_squared = dx*dx + dy*dy;
+
 always @(*) begin
 	has_read_prolog_d = has_read_prolog_q;
 	nnodes_in_file_d = nnodes_in_file_q;
@@ -120,12 +125,16 @@ always @(*) begin
 	sqrt_inp_valid_d = 0;
 	total_dist_d = total_dist_q;
 	delay_ctr_d = delay_ctr_q;
-	
+		
 	case (state_q)
 	STATE_IDLE: begin
 		// Do nothing, yet
 		state_d = STATE_READING_FILE;
 		ready_to_read_d = 0;
+		nnodes_in_file_d = 0;
+		has_read_prolog_d = 0;
+		string_len_d = 0;
+		read_string_d = 0;
 	end
 	STATE_READING_FILE: begin
 		ready_to_read_d = 1;
@@ -245,7 +254,7 @@ always @(*) begin
 	end
 	STATE_COMPUTE_TOTAL_DISTANCE: begin
 		// Load the next two cities
-		sqrt_inp_d = (`X(doutb)-`X(douta))*(`X(doutb)-`X(douta))+(`Y(doutb)-`Y(douta))*(`Y(doutb)-`Y(douta));
+		sqrt_inp_d = dist_squared;//(`X(doutb)-`X(douta))*(`X(doutb)-`X(douta))+(`Y(doutb)-`Y(douta))*(`Y(doutb)-`Y(douta));
 		sqrt_inp_valid_d = 1;
 		state_d = STATE_WAIT_FOR_SQRT_RESULT;
 		addra_d = addra_q + 1;
