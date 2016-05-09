@@ -99,7 +99,8 @@ fn main() {
 	let mut yeezy : usize = 1;
 	let mut slim_shady : usize = yeezy;
 	let mut new_distance : f32 = 0.0;
-	let mut current_distance = total_distance(&path);
+	let original_distance = total_distance(&path);
+	let mut current_distance = original_distance;
 	let mut flag_reset_loop : bool = false;
 	let path_length = path.len();
 	let mut counter : u64 = 0;
@@ -160,12 +161,16 @@ fn main() {
 	
 
 	//Print IDs for verification
+	//
 	for eachNode in path.iter() {
 		println!("{:?}", eachNode.id);
 	}
 
 	let totes_distance = total_distance(&path);
-	println!("TOTAL DISTANCE: {}", totes_distance);
+	println!("\nOriginal Distance: {}", original_distance);
+	println!("Solution Distance: {}", totes_distance);
+
+	//If starting from a280, then solution distance will be 2727.229
 
 	// println!("\n\n--\nEND\n--\n\n");
 }
@@ -187,14 +192,19 @@ fn distance(yeezy: usize, slim_shady : usize, billboard: &[Node]) -> f32{
 //Return the total distance of the tour (index 0 to max)
 fn total_distance(billboard : &[Node]) -> f32{
 	let mut distance_accumulator : f32 = 0.0;
-	let max_index = billboard.len() - 1 - 1;
+	let max_index = billboard.len() - 1;
 
 	//Compute sum of all distances except from last to first.
+	//Upper bound is excluded in for loops
+	//max(index) will be billboard.len()-1-1 = 280-2 = 278
+	//So the for loop will computer the sum till index 279
 	for index in 0..max_index {
 		distance_accumulator += distance(index as usize, index+1 as usize, billboard);
+		// println!("Distance from {} to {}", index, index+1);
 	}
-
-	distance_accumulator += distance(max_index+1 as usize, 0 as usize, billboard);
+	//Add 279 to 0
+	distance_accumulator += distance(max_index as usize, 0 as usize, billboard);
+	// println!("Distance from {} to {}", max_index, 0);
 
 	distance_accumulator
 }
