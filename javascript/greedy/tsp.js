@@ -2,7 +2,7 @@
  *	Greedy TSP in JavaScript/NodeJS implemented by Brandon Dang	
  *
  *	npm install xml2js
- *	node tsp.js [input.xml] [start]
+ *	node tsp.js [input.xml] [startIndex]
  */
 var file = process.argv[2]
 var s = parseInt(process.argv[3])
