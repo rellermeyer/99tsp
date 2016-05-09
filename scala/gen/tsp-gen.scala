@@ -7,13 +7,16 @@
  *
  */
 
- import scala.util._
+ import scala.util.Random
+ import scala.collection.mutable.ListBuffer
+ import scala.io.Source
+ import java.io._
 
  object TSPGenetic {
     class Population(size: Int, groupSize: Int, mutationRate: Double) {
         var tours = new Array[Tour](size)
 
-        for(i <- 0 until size) {
+        for (i <- 0 until size) {
             tours(i) = new Tour(true)
         }
 
@@ -28,11 +31,11 @@
             var replace2 = group.reverse.take(2)(1)
 
             var child1 = crossover(parent1, parent2)
-            if(Random.nextDouble < mutationRate) {
+            if (Random.nextDouble < mutationRate) {
                 child1 = mutate(child1)
             }
             var child2 = crossover(parent2, parent1)
-            if(Random.nextDouble < mutationRate) {
+            if (Random.nextDouble < mutationRate) {
                 child2 = mutate(child2)
             }
             
@@ -51,17 +54,20 @@
             // Get start and end sub tour positions for parent1's tour
             val crossPos = (Random.nextDouble * p1.cities.length).toInt
 
+            // Temporary buffer to hold child's cities
+            var listBuffer = ListBuffer[City]()
+
             // Loop and add the sub tour from parent1 to our child
-            for(i <- 0 until crossPos) {
-                child.cities = p1.cities(i) :: child.cities
+            for (i <- 0 until crossPos) {
+                listBuffer += p1.cities(i)
             }
 
-            val remaining = (p2.cities.toSet -- child.cities.toSet).toList
+            val remaining = (p2.cities.toSet -- listBuffer.toSet).toList
             // Loop through parent2's city tour
-            for(city <- remaining) {
-                child.cities = city :: child.cities
+            for (city <- remaining) {
+                listBuffer += city
             }
-            child.cities = child.cities.reverse;
+            child.cities = listBuffer.toList
             return child
         }
 
@@ -70,7 +76,8 @@
         }
     }
 
-    class City(x: Int, y: Int) {
+    class City(i: Int, x: Int, y: Int) {
+        val idx = i
         val X = x;
         val Y = y;
 
@@ -84,7 +91,7 @@
     class Tour(random: Boolean) {
         var cities = List[City]()
 
-        if(random) {
+        if (random) {
             cities = Random.shuffle(cityList)
         }
 
@@ -94,7 +101,7 @@
 
         def distance: Double = {
             var totalDistance = 0.0
-            for(i <- cities.indices) {
+            for (i <- cities.indices) {
                 val start = cities(i)
                 val dest = if(i+1 > cities.length-1) cities(0) else cities(i+1)
                 totalDistance += start.distanceTo(dest)
@@ -104,29 +111,41 @@
     }
 
     var cityList = List[City]()
-    def parseCities(file: String): List[City] = {
-        return List[City](new City(5, 6), new City(1, 4), new City(10, 2), new City(3, 2), new City(15, 10))
+    def parseCities(file: String) = {
+        val lines = Source.fromFile(file).getLines.toList
+        var listBuffer = new ListBuffer[City]()
+        var read = false
+        for (line <- lines) {
+            if (line == "NODE_COORD_SECTION") {
+                read = true
+            }
+            else if (line == "EOF") {
+                read = false
+            }
+            else if (read) {
+                val cityInfo = line.split("\\s+")
+                val shift = cityInfo.length - 3 // Cause input can either be 3 or 4 columns
+                listBuffer += new City(cityInfo(0+shift).toInt, cityInfo(1+shift).toInt, cityInfo(2+shift).toInt)
+            }
+        }
+        cityList = listBuffer.toList
     }
     
 
     def main(args: Array[String]): Unit = {
-        cityList = parseCities(args(0))
-
-        // May make the algorithm better, not using for now
-        // val numNearbyCities = 5
-        // val nearbyCitiesOdds = 0.9
+        parseCities(args(0))
 
         // The size of the simulation population
-        val populationSize = 10
+        val populationSize = 10000
 
         // Number of random tours chosen from population each generation
-        val groupSize = 5
+        val groupSize = 10
 
         // The percentage that each child after crossover will undergo mutation
         val mutationRate = 0.03
 
         // The maximum number of generations for the simulation.
-        val maxGenerations = 100000
+        val maxGenerations = 10000
 
         var generation = 1
         var population = new Population(populationSize, groupSize, mutationRate)
@@ -137,8 +156,15 @@
             generation += 1
         }
 
-        for(tour <- population.tours) {
-            println(tour.fitness)
-        }
+        // Write out solution
+        val solution = population.tours.sortWith(_.fitness > _.fitness)(0).cities
+        val writer = new PrintWriter(new File("a280tsp-gen-output.tsp"))
+        writer.write("NAME : a280tsp-gen-output.tsp\n")
+        writer.write("TYPE : TOUR\n")
+        writer.write("DIMENSION : " + solution.length + "\n")
+        writer.write("TOUR_SECTION\n")
+        solution.foreach { city => writer.write(city.idx + "\n") }  
+        writer.write("-1")
+        writer.close()
     }
  }
