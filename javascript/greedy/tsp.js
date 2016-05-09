@@ -4,7 +4,6 @@
  *	npm install xml2js
  *	node tsp.js [input.xml] [start]
  */
-
 var file = process.argv[2]
 var s = parseInt(process.argv[3])
 
@@ -38,7 +37,7 @@ else if(s < 0 || s >= Object.keys(nodes).length)
 
 var start = s
 var path = []
-// var total = 0
+var total = 0
 
 var current = start
 while(Object.keys(nodes).length > 0) {
@@ -50,7 +49,7 @@ while(Object.keys(nodes).length > 0) {
 	var min = Number.MAX_SAFE_INTEGER
 	edges.forEach(function(e) {
 		var edge = e
-		var num = parseInt(e._)
+		var num = parseInt(edge._)
 		var cost = edge.$.cost
 		
 		if(cost < min && nodes[num] != undefined) {
@@ -58,7 +57,22 @@ while(Object.keys(nodes).length > 0) {
 			current = num
 		}
 	})
-	// total += min
+
+  if(min != Number.MAX_SAFE_INTEGER)
+    total += parseFloat(min)
+
+  if(Object.keys(nodes).length == 1) {
+    edges.forEach(function(e) {
+      var edge = e
+      var num = parseInt(edge._)
+      var cost = edge.$.cost
+
+      if(num == start)
+        total += parseFloat(cost)
+    })
+  }
 }
+path.push(start)
+
 console.log(path)
-// console.log(total)
+console.log(total)
