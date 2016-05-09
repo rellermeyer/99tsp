@@ -29,7 +29,9 @@ module tsp #(
 	input [7:0] specdata,
 	input has_specdata,
 	output ready_to_read,
-	output [7:0] debug
+	output [7:0] debug,
+	output [PRECISION-1:0] best_distance,
+	output best_distance_valid
 );
 
 reg wea_q, wea_d;
@@ -88,12 +90,14 @@ reg ready_to_read_q, ready_to_read_d;
 assign ready_to_read = ready_to_read_q;
 
 reg [PRECISION-1:0] total_dist_q, total_dist_d;
+assign best_distance = total_dist_q;
+assign best_distance_valid = (state_q == STATE_DONE_SOLVING);
 
 `define LASTCHAR ((read_string_q>>((string_len_q-1)*8))&8'hFF)
 `define X(v) (v[PRECISION-1:0])
 `define Y(v) (v[PRECISION*2-1:PRECISION])
 
-assign debug = number_q[7:0];//{sqrt_inp_q[1:0], total_dist_q[5:0]};//total_dist_q[7:0];//string_len_q;//{state_q[2:0], has_read_prolog_q, nextstate_q[2:0], 1'b0};//nnodes_in_file_q[7:0];//((read_string_q>>((string_len_q-1)*8))&8'hFF);//{string_len_q[3:0],nnodes_in_file_q[3:0]};
+assign debug = {sqrt_inp_q[1:0], total_dist_q[5:0]};//total_dist_q[7:0];//string_len_q;//{state_q[2:0], has_read_prolog_q, nextstate_q[2:0], 1'b0};//nnodes_in_file_q[7:0];//((read_string_q>>((string_len_q-1)*8))&8'hFF);//{string_len_q[3:0],nnodes_in_file_q[3:0]};
 
 always @(*) begin
 	has_read_prolog_d = has_read_prolog_q;
@@ -168,6 +172,8 @@ always @(*) begin
 	STATE_READ_NNODES: begin
 		nnodes_in_file_d = number_q;
 		state_d = STATE_READING_FILE;
+		string_len_d = 0;
+		read_string_d = 0;
 	end
 	STATE_READ_Y: begin
 		read_y_d = number_q;
@@ -184,7 +190,7 @@ always @(*) begin
 	end
 	STATE_READ_X: begin
 		// Save this X,Y into RAM
-		dina_d = read_y_q;//64'hffffffffffffffff;//{read_y_q, number_q};
+		dina_d = {read_y_q, number_q[PRECISION-1:0]};
 		wea_d = 1;
 		//addra_d = addra_q + 1;
 		state_d = STATE_DELAY;//INCR_ADDR;//READING_FILE;
@@ -199,12 +205,11 @@ always @(*) begin
 	end
 	STATE_CONSUMING_NUMBER: begin
 		// We're taking the number off of the string buffer and putting it in our buffer
-		//if (((read_string_q>>((string_len_q-1)*8))&8'hFF) < 48 || ((read_string_q>>((string_len_q-1)*8))&8'hFF) > 57) begin //read_string_q[7+string_len_q*8:0+string_len_q*8] < 48 || read_string_q[7+string_len_q*8:0+string_len_q*8] > 57) begin
 		if (`LASTCHAR < 48 || `LASTCHAR > 57) begin
 			//nnodes_in_file_d = 6;
 			state_d = STATE_PARSING_NUMBER;//nextstate_q;
-			string_len_d = 0;
-			read_string_d = 0;
+			//string_len_d = 0;
+			//read_string_d = 0;
 			number_d = 0;
 		end else begin
 			//nnodes_in_file_d = (nnodes_in_file_q<<3) + (nnodes_in_file_q<<1) + ((read_string_q>>((string_len_q-1)<<3))&8'hFF) - 48;//(nnodes_in_file_q<<3) + (nnodes_in_file_q<<2) + ((read_string_q>>((string_len_q-1)*8))&8'hFF) - 48;
@@ -240,13 +245,16 @@ always @(*) begin
 	end
 	STATE_COMPUTE_TOTAL_DISTANCE: begin
 		// Load the next two cities
-		sqrt_inp_d = douta[7:0]+1/**`X(doutb)*/;//(`X(doutb)-`X(douta))*(`X(doutb)-`X(douta))+(`Y(doutb)-`Y(douta))*(`Y(doutb)-`Y(douta));
+		sqrt_inp_d = (`X(doutb)-`X(douta))*(`X(doutb)-`X(douta))+(`Y(doutb)-`Y(douta))*(`Y(doutb)-`Y(douta));
 		sqrt_inp_valid_d = 1;
 		state_d = STATE_WAIT_FOR_SQRT_RESULT;
 		addra_d = addra_q + 1;
-		if (addrb_q+1 >= nnodes_in_file_q) begin
-			// One more and then we're done
+		if (addrb_q == 0) begin
+			// Last one
 			nextstate_d = STATE_DONE_SOLVING;
+		end else if (addrb_q+1 >= nnodes_in_file_q) begin
+			// One more and then we're done
+			nextstate_d = STATE_COMPUTE_TOTAL_DISTANCE;
 			addrb_d = 0;
 		end else begin
 			nextstate_d = STATE_COMPUTE_TOTAL_DISTANCE;
@@ -261,6 +269,7 @@ always @(*) begin
 		end
 	end
 	STATE_DONE_SOLVING: begin
+		state_d = STATE_IDLE;
 	end
 	endcase
 end
