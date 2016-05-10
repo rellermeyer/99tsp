@@ -15,6 +15,7 @@ There are, in addition to the source files, 7 modules which must be generated:
 - floating_point_add: Adds two floats.
 - floating_point_mult: Multiplies two floats.
 - floating_point_mult_double: Multiplies two doubles.
+- floating_point_recprocate: Computes the reciprocal of a floating point value.
 
 The algorithm is not particularly complicated. distance.v and negexp.v abstract away heavy math (sqrt(dx*dx+dy*dy) and the Taylor expansion of e^x, respectively).
 
@@ -29,3 +30,9 @@ The first step deals with converting from a textual representation of the file t
 The next step computes the total length. Again, nothing special here.
 
 Then we try swaps. When we try swaps, observe that we don't have to re-compute the entire distance every time: Since distance are rounded to integers (per the TSPLIB spec), if we have a sequence of cities 1-2-3-4 and we're considering swapping 2 and 3 (to 1-3-2-4), we need only compute the distances 1-2, 3-4, 1-3, 2-4, and compare (1-2)+(3-4) with (1-3)+(2-4).
+
+The temperature schedule is: Start at a given temperature, multiply it each iteration by a constant value (about 0.9999999). Since we only ever divide by T (and division is super expensive - over 30 cycles!), we start at a given 1/T, and multiply it each iteration by 1/factor (about 1.0000001).
+
+However, we still have to do a reciprocal, and thus the latency of each iteration is on the order of a hundred cycles. Since iterations aren't pipelined (yet), the throughput is about 1 per 100 cycles.
+
+But, for all of these problems, this code used to fit onto the Mojo chip. Post-translate it uses 157% of the LUTs, and map takes several hours so hopefully it'll fit. We'll see.

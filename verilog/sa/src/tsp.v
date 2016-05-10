@@ -95,7 +95,8 @@ localparam STATE_IDLE = 0,
 	STATE_LOADING_CITY_1 = 14,
 	STATE_LOADED_FIRST_CITIES = 15,
 	STATE_LOADED_SECOND_CITIES = 16,
-	STATE_PIPING_DISTANCES = 17;
+	STATE_PIPING_DISTANCES = 17,
+	STATE_WAITING_PC = 18;
 reg [4:0] state_q, state_d, nextstate_q, nextstate_d;
 
 reg has_read_prolog_q, has_read_prolog_d;
@@ -130,6 +131,7 @@ reg [2:0] pipe_tx_ctr_q, pipe_tx_ctr_d, pipe_rx_ctr_q, pipe_rx_ctr_d;
 reg [PRECISION*5*2-1:0] pipe_tx_buf_a_q, pipe_tx_buf_a_d, pipe_tx_buf_b_q, pipe_tx_buf_b_d;
 reg [PRECISION*5-1:0] pipe_rx_buf_q, pipe_rx_buf_d;
 
+// This is actually 1/T, to optimize (new-old)/T to (new-old)*T, which is much faster
 reg [63:0] temperature_q, temperature_d;
 
 wire [63:0] new_temperature;
@@ -137,7 +139,7 @@ floating_point_mult_double temp_mult(
 	.aclk(clk),
 	.s_axis_a_tdata(temperature_q),
 	.s_axis_a_tvalid(1),
-	.s_axis_b_tdata(64'h3FEFFFFFCA501ACB), // 0.9999999 in double-precision IEEE753
+	.s_axis_b_tdata(64'h3FF0000002AF31DC), // 1.0000001 in double-precision IEEE753
 	.s_axis_b_tvalid(1),
 	.m_axis_result_tdata(new_temperature),
 	.m_axis_result_tvalid()
@@ -153,6 +155,21 @@ div_mod rng_divider(
 	.s_axis_dividend_tdata(rng),
 	.m_axis_dout_tvalid(),
 	.m_axis_dout_tdata(rng_mod)
+);
+
+reg [PRECISION-1:0] pc_new_q, pc_new_d, pc_old_q, pc_old_d;
+reg pc_valid_q, pc_valid_d;
+wire [31:0] pc_out;
+wire pc_out_valid;
+prob_computer probputer(
+	.clk(clk),
+	.rst(rst),
+	.new(pc_new_q),
+	.old(pc_old_q),
+	.Tinv(temperature_q),
+	.inp_valid(pc_valid_q),
+	.out(pc_out),
+	.out_valid(pc_out_valid)
 );
 
 always @(*) begin
@@ -195,6 +212,10 @@ always @(*) begin
 	pipe_rx_buf_d = pipe_rx_buf_q;
 	
 	temperature_d = temperature_q;
+	
+	pc_valid_d = 0;
+	pc_new_d = pc_new_q;
+	pc_old_d = pc_old_q;
 		
 	case (state_q)
 	STATE_IDLE: begin
@@ -338,7 +359,7 @@ always @(*) begin
 		addra_d = addra_q + 1;
 		if (addrb_q == 0) begin
 			// Last one
-			nextstate_d = STATE_DONE_SOLVING;
+			nextstate_d = STATE_COMPUTED_TOTDIST; // Start doing the SA iterations
 		end else if (addrb_q+1 >= nnodes_in_file_q) begin
 			// One more and then we're done
 			nextstate_d = STATE_COMPUTE_TOTAL_DISTANCE;
@@ -355,6 +376,12 @@ always @(*) begin
 			state_d = nextstate_q;//STATE_COMPUTE_TOTAL_DISTANCE;
 		end
 	end
+	STATE_COMPUTED_TOTDIST: begin
+		state_d = STATE_DELAY;
+		temperature_d = 64'h3F1A36E2EB1C432D; // 1/10000 in double
+		delay_ctr_d = 50;
+		nextstate_d = STATE_LOADING_CITY_1;
+	end
 	STATE_DONE_SOLVING: begin
 		state_d = STATE_IDLE;
 	end
@@ -364,6 +391,7 @@ always @(*) begin
 	STATE_LOADING_CITY_1: begin
 		// Update the temperature
 		// we may need to compute e^(-(new-old)/T) = e^((old-new)/T), so start computing 1/T
+		// (which is done simply by updating 1/T with 1/factor)
 		temperature_d = new_temperature;
 
 		// Pick a city to swap with the next one. (TODO: modulo)
@@ -421,10 +449,32 @@ always @(*) begin
 				dinb_d = city2_q;
 				web_d = 1;
 				state_d = STATE_LOADING_CITY_1; // Repeat
+
+				// Update best_distance
+				total_dist_d = total_dist_q + pipe_rx_buf_q[63:32]+pipe_rx_buf_q[31:0] - pipe_rx_buf_q[127:96]+pipe_rx_buf_q[95:64];
 			end else begin
-				// We have to compute e^((old-new)/T). Or not.
-				state_d = STATE_LOADING_CITY_1;
+				// We have to compute e^(-(new-old)/T)
+				// We don't have to add best_distance to each of these, because they're eventually subtracted from each other
+				pc_valid_d = 1;
+				pc_new_d = pipe_rx_buf_q[63:32]+pipe_rx_buf_q[31:0];
+				pc_old_d = pipe_rx_buf_q[127:96]+pipe_rx_buf_q[95:64];
+				state_d = STATE_WAITING_PC;
 			end
+		end
+	end
+	STATE_WAITING_PC: begin
+		if (pc_out_valid) begin
+			if (rng < pc_out) begin
+				// Swap!
+				dina_d = city3_q;
+				wea_d = 1;
+				dinb_d = city2_q;
+				web_d = 1;
+
+				// Update best_distance
+				total_dist_d = total_dist_q + pc_new_q - pc_old_q;
+			end
+			state_d = STATE_LOADING_CITY_1; // Repeat
 		end
 	end
 	endcase
@@ -479,6 +529,9 @@ always @(posedge clk) begin
 		temperature_q <= temperature_d;
 		dinb_q <= dinb_d;
 		web_q <= web_d;
+		pc_valid_q <= pc_valid_d;
+		pc_new_q <= pc_new_d;
+		pc_old_q <= pc_old_d;
 	end
 end
 

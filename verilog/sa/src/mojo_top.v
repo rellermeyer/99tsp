@@ -72,30 +72,8 @@ tsp tsp(
 	.rng(rng_out)
 );
 
-wire [31:0] floatval;
-wire floatval_valid;
-fixed2float f2f(
-	.aclk(clk),
-	.s_axis_a_tvalid(best_distance_valid),
-	.s_axis_a_tdata(best_distance),
-	.m_axis_result_tvalid(floatval_valid),
-	.m_axis_result_tdata(floatval)
-);
-
-wire [31:0] exp_res;
-wire [7:0] exp_debug;
-wire exp_res_valid;
-negexp negexp(
-	.clk(clk),
-	.rst(rst),
-	.inp(floatval),
-	.inp_valid(floatval_valid),
-	.out(exp_res),
-	.out_valid(exp_res_valid),
-	.debug(exp_debug)
-);
-
 reg [31:0] printval_q, printval_d;
+reg [27:0] cntdown_q, cntdown_d;
 reg [4:0] digit_cnt_q, digit_cnt_d;
 reg tx_hold_q, tx_hold_d;
 
@@ -105,6 +83,7 @@ always @(*) begin
 	printval_d = printval_q;
 	digit_cnt_d = digit_cnt_q;
 	tx_hold_d = 0;
+	cntdown_d = cntdown_q - 1;
 
 	if (serial_new_data) begin
 		if (serial_data == 114 && !tx_busy) begin
@@ -134,18 +113,13 @@ always @(*) begin
 		digit_cnt_d = digit_cnt_q - 1;
 		tx_hold_d = 1;
 	end
-	if (exp_res_valid) begin
-		printval_d = exp_res;
-		digit_cnt_d = 8;
-		tx_data_d = "\n";
-		tx_new_data_d = 1;
-	end
-	/*if (best_distance_valid) begin
+	if (best_distance_valid || cntdown_q == 0) begin
 		printval_d = best_distance;
 		digit_cnt_d = 8;
 		tx_data_d = "\n";
 		tx_new_data_d = 1;
-	end*/
+		cntdown_d = 100000000;
+	end
 end
 
 always @(posedge clk) begin
@@ -159,10 +133,11 @@ always @(posedge clk) begin
 		printval_q <= printval_d;
 		digit_cnt_q <= digit_cnt_d;
 		tx_hold_q <= tx_hold_d;
+		cntdown_q <= cntdown_d;
 	end
 end
 
-assign led = exp_debug;//floatval[7:0];//rng_out[7:0];//{tx_busy, printval_q[6:0]};
+assign led = best_distance[7:0];//exp_debug;//floatval[7:0];//rng_out[7:0];//{tx_busy, printval_q[6:0]};
 //assign led = exp_res[7:0];
 
 // these signals should be high-z when not used
