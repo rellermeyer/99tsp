@@ -1,11 +1,9 @@
-#![allow(warnings)]
 use std::env;
+use std::io::Error;
 use std::io::prelude::*;
 use std::fs::File;
 use std::process::exit;
-use std::collections::linked_list::LinkedList;
 use std::f32;
-use std::clone;
 
 #[derive(Clone)]
 struct Node {
@@ -16,231 +14,205 @@ struct Node {
 
 
 fn main() {
-	// println!("\n\n--\nTesting\n--\n\n");
+	//Rust's type system is pretty good.
+	//There are so many compile time checks!
 
-	//Get test_file path
-	let mut args_iterator = env::args();
-	let mut path_string = String::new();
-	if args_iterator.nth(1).is_some() {
-		args_iterator = env::args();
-		path_string = args_iterator.nth(1).unwrap();
-		// println!("TestFile Path: {}\n", path_string);
-	}
-	else {
-		println!("ERROR: No input file specified.");
-		exit(0);
-	}
+	//If a process can error, like file reading, then you can set the return type
+	//	of the function in which it is called to Result<T, E>
+	//	where T is the result of success and E is the error.
+	//See get_test_file() for more details.
 
-
-	let mut test_file = File::open(path_string).unwrap();
-	let mut all_text = String::new();
-	test_file.read_to_string(&mut all_text);
-	// println!("\nFile contents:\n{}\nEND File contents\n", all_text);
-
-	let mut split_point = all_text.find("NODE_COORD_SECTION");
-
-	if split_point == None {
-		println!("ERROR: Input file has invalid syntax. No NODE_COORD_SECTION.");
-		exit(0);
-	}
-
-	let (trash, nodes_text) = all_text.split_at(split_point.unwrap());
-	drop(trash);
-	
-	split_point = nodes_text.find("\n");
-
-	if split_point == None {
-		println!("ERROR: Input file has invalid syntax. No data after NODE_COORD_SECTION");
-		exit(0);
-	}
-
-	let (trash, nodes_text) = nodes_text.split_at(split_point.unwrap()+1);
-	drop(trash);
-
-	split_point = nodes_text.find("EOF");
-
-	if split_point == None {
-		println!("ERROR: Input file has invalid syntax. No explicit (literal) EOF.");
-		exit(0);
-	}
-
-	let (nodes_text, trash) = nodes_text.split_at(split_point.unwrap()-1);
-	drop(trash);
-
-	// println!("\nnodes_text:\n{}", nodes_text);
-	// println!("-\nEND nodes_text\n");
+	//Get the text in the test file.
+	//The only way to get a value out of an enum is pattern matching.
+	let all_text : String = match get_test_file() {
+		Ok(text) => text,
+		Err(error) => file_read_error(error),
+	};
 
 
-	let nodes_iterator = nodes_text.lines();
+	//Parse the text in the input file. See function for more details.
+	//Type declaration here is optional, it will be inferred from return type of parse()
+	let path : Vec<Node> = parse(all_text);
 
-	let mut path : Vec<Node> = Vec::new();
-	let mut temp_id : i32 = 0;
-	let mut temp_x : i32 = 0;
-	let mut temp_y : i32 = 0;
-
-
-	for each_node in nodes_iterator {
-		
-		let mut coords_iterator = each_node.split_whitespace();
-		//First num will be id
-		temp_id = coords_iterator.next().unwrap().parse::<i32>().unwrap();
-		//Second num will be x coordinate
-		temp_x = coords_iterator.next().unwrap().parse::<i32>().unwrap();
-		//Third num will be y coordinate
-		temp_y = coords_iterator.next().unwrap().parse::<i32>().unwrap();
-		//That should be the end of this line.
-
-		let mut new_node = Node {id:temp_id, x:temp_x, y:temp_y};
-		// println!("Adding Node ({}, {}, {}, {})", new_node.index, new_node.id, new_node.x, new_node.y);
-		path.push(new_node);
-	}
-
-	// println!("{}, {}, {}, {}", path[26].index, path[26].id, path[26].x, path[26].y);
-	let mut yeezy : usize = 1;
-	let mut slim_shady : usize = yeezy;
-	let mut new_distance : f32 = 0.0;
+	//Save the original distance for comparision later.
 	let original_distance = total_distance(&path);
-	let mut current_distance = original_distance;
+
+	//Get solution. See function for more details.
+	//Notice there is no type declaration here. Just demonstrating.
+	let solution_path = two_opt(path);
+
+	print_solution(&solution_path);
+
+	//Print original and solution distances for comparision. 
+	let totes_distance = total_distance(&solution_path);
+	println!("\nOriginal Distance: {}", original_distance);
+	println!("Solution Distance: {}", totes_distance);
+
+	//If starting from a280, then solution distance will be:	2756.788
+	//If the starting node i is set to 1 instead of 0, then
+	//	the solution distance will be:							2727.229
+}
+
+fn two_opt(mut path : Vec<Node>) -> Vec<Node> {
+	//yeezy 		is index i
+	//slim_shady 	is index j
+	//For a280.tsp, starting at 1 instead of 0 gives a better solution.
+	//	That is, set yeezy = 1 to get a better solution for a280.tsp
+	let mut yeezy : usize = 0;
+	let mut slim_shady : usize = yeezy;
+	//Used to hold the tour length of the current solution
+	let mut current_distance = total_distance(&path);
+	//Used to indicate that a swap has occured and the loop must start from the beginning
 	let mut flag_reset_loop : bool = false;
+	//Used to break from the loop if either index variable has increased out of bounds
 	let path_length = path.len();
-	let mut counter : u64 = 0;
+	//Used to teporarily hold the solution path for copying. 
 	let mut new_path : Vec<Node> = Vec::new();
 
-	//Attemp each possible swap
+	//Attemp each possible swap. For each edge, attempt swap with every other edge.
+	//Edges are tracked by the index of the node they start from.
+	//There is no need to attempt swapping with edges that come before the current edge because
+	//	that combination has already been attempted. Therefore yeezy <= slim_shady
+	
+	//For loops in Rust work only on iterators, kinda like python.
+	//Hence, an infinite loop with break conditions has to be used. 
+	//Index variables are modified manually.
 	'outer: loop {
+		//Break condition. All swaps attepted. Current solution is final solution.
 		if yeezy >= path_length {
 			break 'outer;
 		}
-		// if counter >= 500 {
-		// 	break 'outer;
-		// }
+
 		'inner: loop {
+			//Break condition. All edges j for edge i have been attempted. Increment i.
 			if slim_shady >= path_length {
+				//i will be incremented upon breaking from this loop, but j has to incremented right here
 				slim_shady = yeezy+1;
 				break 'inner;
 			}
-			// println!("Testing {}[{}]\t{}[{}]", yeezy, path[yeezy].id, slim_shady, path[slim_shady].id);
-			// let current_distance = distance(yeezy, slim_shady, &path);
-			new_distance = test_distance(yeezy, slim_shady, &path, current_distance);
+
+			//Test the cuurent swap
+			let new_distance = test_distance(yeezy, slim_shady, &path, current_distance);
+
 			if new_distance < current_distance {
-				// println!("FOUND BETTER PATH by swapping {} and {}\t\t{}", yeezy, slim_shady, counter);
-				// println!("{:?}", current_distance);
-				// println!("{:?}", new_distance);
-				
 				//make the swap
+				//Copy the solution to new_path
 				new_path.clear();
 				new_path.extend_from_slice(swap(yeezy, slim_shady, & mut path));
-				// v.extend(s.iter().cloned());
+				//Erase the old path and copy the solution to it.
 				path.clear();
 				path.extend_from_slice(&new_path);
 				//update current_distance
 				current_distance = total_distance(&path);
 				//restart from very beginning
 				flag_reset_loop = true;
-				counter += 1;
 				break 'inner;
 			}
-			// println!("Distance from {} to {} = {}", yeezy, slim_shady, current_distance);
+			//This swap was not an improvement.
+			//Increment j
 			slim_shady += 1;
 		}
+		//break 'inner will arrive here.
 		if flag_reset_loop {
+			//Increment i, set j=i, reset the reset flag, and continue
 			yeezy = 1;
 			slim_shady = yeezy;
 			flag_reset_loop = false;
 			continue 'outer;
 		}
+		//All swaps with this edge i have been attempted, increment i. 
 		yeezy += 1;
 	}
-	// println!("current_distance:\t{}", current_distance);
-	// new_distance = test_distance(1, 3, &path, current_distance);
 
-	// println!("new_distance:\t{}", new_distance);
-
-	// path.swap(1, 3);
-
-	
-
-	//Print IDs for verification
-	//
-	for eachNode in path.iter() {
-		println!("{:?}", eachNode.id);
-	}
-
-	let totes_distance = total_distance(&path);
-	println!("\nOriginal Distance: {}", original_distance);
-	println!("Solution Distance: {}", totes_distance);
-
-	//If starting from a280, then solution distance will be 2727.229
-
-	// println!("\n\n--\nEND\n--\n\n");
+	path
 }
 
-//return the distance between two nodes
+//return the distance between two nodes, indicated by index.
+//No error checking. This method is only called by other methods that have error checking
 fn distance(yeezy: usize, slim_shady : usize, billboard: &[Node]) -> f32{
-	let mut distance : f32 = 0.0;
-	let mut x_distance: f32 = 0.0;
-	let mut y_distance: f32 = 0.0;
-	x_distance = (billboard[yeezy].x - billboard[slim_shady].x) as f32;
-	y_distance = (billboard[yeezy].y - billboard[slim_shady].y) as f32;
-	distance = x_distance.powi(2) + y_distance.powi(2);
-	distance = distance.sqrt();
 
+	let x_distance = (billboard[yeezy].x - billboard[slim_shady].x) as f32;
+	let y_distance = (billboard[yeezy].y - billboard[slim_shady].y) as f32;
+	let distance = f32::sqrt(x_distance.powi(2) + y_distance.powi(2));
 	distance
-
 }
 
-//Return the total distance of the tour (index 0 to max)
+
+//Return the total distance of the tour (cyclical tour, so max->0 is included)
 fn total_distance(billboard : &[Node]) -> f32{
+
 	let mut distance_accumulator : f32 = 0.0;
 	let max_index = billboard.len() - 1;
 
 	//Compute sum of all distances except from last to first.
-	//Upper bound is excluded in for loops
-	//max(index) will be billboard.len()-1-1 = 280-2 = 278
-	//So the for loop will computer the sum till index 279
+	//In Rust for loops, the upper bound is excluded. Therefore:
+	//	max(index) will be billboard.len()-1-1 = 280-2 = 278
+	//So the for loop will compute the sum till index 279
 	for index in 0..max_index {
 		distance_accumulator += distance(index as usize, index+1 as usize, billboard);
-		// println!("Distance from {} to {}", index, index+1);
 	}
 	//Add 279 to 0
 	distance_accumulator += distance(max_index as usize, 0 as usize, billboard);
-	// println!("Distance from {} to {}", max_index, 0);
 
 	distance_accumulator
 }
 
 //Swap edges
+//The vector containing the path is passed as a mutable slice, and the modified slice is returned. 
 fn swap(mut yeezy: usize, mut slim_shady : usize, billboard: & mut[Node]) -> & mut [Node]{
-	while yeezy < slim_shady {
+
+	//If the requested swap is the first and last node, then simply swap them.
+	if yeezy == 0 && slim_shady == billboard.len()-1 {
 		billboard.swap(yeezy, slim_shady);
-		yeezy += 1;
-		slim_shady -= 1;
+		billboard
 	}
-	billboard
+	//If the requested swap is anything else, then reverse all the nodes between the specified nodes inclusive.
+	//1 2 3 4 5 6 7 8 9 10 and we want to swap edges between (3,4) and (8,9)
+	//Then 3 will be followed by 8, and 4 will be followed by 9.
+	//1 2 3 8 7 6 5 4 9 10
+	else {
+		while yeezy < slim_shady {
+			billboard.swap(yeezy, slim_shady);
+			yeezy += 1;
+			slim_shady -= 1;
+		}
+		billboard
+	}
 }
 
 //Virtually swap two nodes and return new distance.
-//No swapping actually occurs. Vector is unmuatable.
+//No swapping actually occurs. The Vector containing the path is passed as an unmuatble slice.
 fn test_distance(yeezy: usize, slim_shady : usize, billboard: &[Node], current_distance: f32) -> f32{
 
 	let mut new_distance = current_distance;
 
+	//Swapping with self
 	if yeezy == slim_shady {
 		return current_distance
 	}
+	//Edge case handling
+	//Swapping the first and last nodes.
+	else if yeezy == 0 && slim_shady == billboard.len()-1 {
+		new_distance -= distance(0, 1, billboard);
+		new_distance -= distance(billboard.len()-2, billboard.len()-1, billboard);
+		//Add new edges
+		new_distance += distance(billboard.len()-1, 1, billboard);
+		new_distance += distance(billboard.len()-2, 0, billboard);
 
-	//Edge case handling.
-	// if yeezy == billboard.len()-1 {
-	// 	new_distance -= distance(yeezy, 0, billboard);
-	// 	new_distance -= distance(slim_shady, slim_shady+1, billboard);
+		return new_distance
+	}
+	//Swapping the first node with some other node except the last
+	else if yeezy == 0 && slim_shady != billboard.len()-1{
+		new_distance -= distance(billboard.len()-1, yeezy, billboard);
+		new_distance -= distance(slim_shady, slim_shady+1, billboard);
+		//Add new edges
+		new_distance += distance(billboard.len()-1, slim_shady, billboard);
+		new_distance += distance(yeezy, slim_shady+1, billboard);
 
-	// 	new_distance += distance(yeezy, slim_shady, billboard);
-	// 	new_distance += distance(0, slim_shady+1, billboard);
-
-	// 	return new_distance
-	// }
-
-	if slim_shady == billboard.len()-1 {
+		return new_distance
+	}
+	//Swapping the last node with some other node except the first.
+	else if yeezy != 0 && slim_shady == billboard.len()-1 {
 		new_distance -= distance(yeezy-1, yeezy, billboard);
 		new_distance -= distance(slim_shady, 0, billboard);
 
@@ -249,16 +221,163 @@ fn test_distance(yeezy: usize, slim_shady : usize, billboard: &[Node], current_d
 
 		return new_distance
 	}
+	//Swapping a central node with another central node. 
+	else {
+		new_distance -= distance(yeezy-1, yeezy, billboard);
+		new_distance -= distance(slim_shady, slim_shady+1, billboard);
+		//Add new edges
+		new_distance += distance(yeezy-1, slim_shady, billboard);
+		new_distance += distance(yeezy, slim_shady+1, billboard);
 
-	
-	//Remove yeezy->yeezy+1 and slim_shady->slim_shady+1 
-	//Remove old edges
-	new_distance -= distance(yeezy-1, yeezy, billboard);
-	new_distance -= distance(slim_shady, slim_shady+1, billboard);
-	//Add new edges
-	new_distance += distance(yeezy-1, slim_shady, billboard);
-	new_distance += distance(yeezy, slim_shady+1, billboard);
+		new_distance
+	}
+}
 
-	new_distance
+//Attempt to get the test file.
+//This showcases some of Rust's safety measures.
+fn get_test_file() -> Result<String, Error> {
 
+	//Get test_file path. Does not need to be in main(). WOW.
+	let mut args_iterator = env::args();
+	if args_iterator.nth(1).is_some() {
+		//Path has been supplied. Reset iterator so it can be grabbed.
+		args_iterator = env::args();
+	}
+	else {
+		println!("ERROR: No input file specified.");
+		exit(0);
+	}
+
+	//We know args_iterator.nth(1).is_some() == true so we can "safely" unwrap it.
+	//The unwrap function will get the result of success. 
+	//If the open errors, then the try! macro will return early
+	let mut test_file = try!(File::open(args_iterator.nth(1).unwrap()));
+	let mut all_text = String::new();
+	//If the file is empty or corrupted, then read_to_string will return an error.
+	//So it is wrapped in a try! macro, which will early return an error
+	try!(test_file.read_to_string(&mut all_text));
+	//Phew, all of that worked. all_text now contains the text in the file.
+	//Return an Ok()
+	Ok(all_text)
+}
+
+//To satisfy types, this returns a string. But it will just exit.
+fn file_read_error(error: Error) -> String {
+	println!("ERROR: File cannot be opened/read.");
+	println!("{:?}", error);
+	exit(0);
+}
+
+//Parse the input file into a Vec<Node>
+fn parse(all_text : String) -> Vec<Node> {
+
+	//Find the relevant section. We want the data after "NODE_COORD_SECTION"
+	let mut split_point = all_text.find("NODE_COORD_SECTION");
+
+	//Relevant section does not exist.
+	if split_point == None {
+		println!("ERROR: Input file has invalid syntax. No NODE_COORD_SECTION.");
+		exit(0);
+	}
+
+	//Dump the data before "NODE_COORD_SECTION". Our data is in all_text
+	let (trash, all_text) = all_text.split_at(split_point.unwrap());
+	drop(trash);
+
+	//"NODE_COORD_SECTION" is included in all_text so split at the first \n
+	split_point = all_text.find("\n");
+
+	//No data
+	if split_point == None {
+		println!("ERROR: Input file has invalid syntax. No data after NODE_COORD_SECTION");
+		exit(0);
+	}
+
+	//Dump "NODE_COORD_SECTION\n"
+	let (trash, all_text) = all_text.split_at(split_point.unwrap()+1);
+	drop(trash);
+
+	//.tsp files contain a literal "EOF"
+	split_point = all_text.find("EOF");
+
+	//"EOF" not found
+	if split_point == None {
+		println!("ERROR: Input file has invalid syntax. No explicit (literal) EOF.");
+		exit(0);
+	}
+
+	//Dump all the data after "EOF"
+	let (all_text, trash) = all_text.split_at(split_point.unwrap()-1);
+	drop(trash);
+
+
+	//Now have list of nodes, in the format "[id] [x] [y]" with one node per line.
+
+
+	let nodes_iterator = all_text.lines();
+	//An array of Nodes
+	let mut path : Vec<Node> = Vec::new();
+
+	//Parsing has no error handling. If the data is in an invalid format, the function will fail.
+	//Iterate over each line in all_text, and parse the data into Node objects
+	for each_node in nodes_iterator {
+		//An iterator split by whitespace
+		let mut coords_iterator = each_node.split_whitespace();
+		//First num will be id
+		let id = coords_iterator.next().unwrap().parse::<i32>().unwrap();
+		//Second num will be x coordinate
+		let x = coords_iterator.next().unwrap().parse::<i32>().unwrap();
+		//Third num will be y coordinate
+		let y = coords_iterator.next().unwrap().parse::<i32>().unwrap();
+		//That should be the end of this line.
+
+		let new_node = Node {id:id, x:x, y:y};
+		path.push(new_node);
+	}
+
+	path
+}
+
+//Print solution path in array format
+fn print_array(path : &[Node]){
+	print!("[");
+	let path_length = path.len();
+	let mut counter = 0;
+	for each_node in path.iter() {
+		print!("{}", each_node.id);
+		if counter < path_length-1 {
+			print!(", ");
+		}
+		counter += 1;
+	}
+	print!("]");
+}
+
+//Print solution path in list format (one node ID on each line)
+fn print_list(path : &[Node]){
+	for each_node in path.iter() {
+		println!("{:?}", each_node.id);
+	}
+}
+
+//Print the solution path as per the flag specified when called
+//Defaults to list format (one node ID on each line)
+fn print_solution(solution_path : &[Node]){
+
+	//Check if flag -printarray was specified after testfile
+	let mut args_iterator = env::args();
+	if args_iterator.nth(2).is_some() {
+		//Flag has been specified. Reset iterator so it can be grabbed.
+		args_iterator = env::args();
+		let run_flag = args_iterator.nth(2).unwrap();
+		if run_flag == "-printarray" {
+			print_array(solution_path);
+		}
+		else{
+			print_list(solution_path);
+		}
+	}
+	else {
+		print_list(solution_path);
+	}
 }
