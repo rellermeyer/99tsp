@@ -20,23 +20,25 @@
             tours(i) = new Tour(true)
         }
 
-        def evolve = {
+        def evolve: Unit = {
+            // Breed and mutate this population
             var newTours = new Array[Tour](size)
-            newTours(0) = tours.maxBy(_.fitness) // Elitism
+            newTours(0) = fittest // Elitism
             for (i <- 1 until size) {
                 val parent1 = selection
                 val parent2 = selection
 
                 var child = crossover(parent1, parent2)
-                child = mutate(child)
+                mutate(child)
 
                 newTours(i) = child
             }
             tours = newTours
         }
 
-        def mutate(t: Tour): Tour = {
-            for (i <- t.cities.indices) {
+        def mutate(t: Tour): Unit = {
+            // Go through list, randomly swapping elements at mutationRate
+            t.cities.indices.foreach { i =>
                 if (Random.nextDouble < mutationRate) {
                     val swapPos =  Random.nextInt(t.cities.length)
                     // Swap two cities
@@ -47,10 +49,10 @@
                     t.cities = arr.toList
                 }
             }
-            return t
         }
 
         def crossover(p1: Tour, p2: Tour): Tour = {
+            // Create child tour with random chunk from p1 and the rest from p2
             var child = new Tour(false);
 
             val crossPos = Random.nextInt(p1.cities.length)
@@ -58,11 +60,16 @@
             val rightSlice = (p2.cities.toSet -- leftSlice.toSet).toList
 
             child.cities = leftSlice:::rightSlice
-            return child
+            child
         }
 
         def selection: Tour = {
-            return Random.shuffle(tours.toList).take(groupSize).maxBy(_.fitness)
+            // Take most fit tour from a random sample
+            Random.shuffle(tours.toList).take(groupSize).maxBy(_.fitness)
+        }
+
+        def fittest: Tour = {
+            tours.maxBy(_.fitness)
         }
     }
 
@@ -72,9 +79,10 @@
         val Y = y;
 
         def distanceTo(city: City): Double = {
+            // Euclidean distance to another city
             val xDistance = X - city.X
             val yDistance = Y - city.Y
-            return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+            Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
         }
     }
 
@@ -86,22 +94,23 @@
         }
 
         def fitness: Double = {
-            return 1 / distance
+            // Maximize this in order to minimize distance
+            1 / distance
         }
 
         def distance: Double = {
-            var totalDistance = 0.0
-            for (i <- cities.indices) {
+            // Sum of distances across the tour
+            cities.indices.foldLeft(0.0)((total, i) => {
                 val start = cities(i)
                 val dest = if(i+1 > cities.length-1) cities(0) else cities(i+1)
-                totalDistance += start.distanceTo(dest)
-            }
-            return totalDistance
+                total + start.distanceTo(dest)
+            })
         }
     }
 
     var cityList = List[City]()
-    def parseCities(file: String) = {
+    def parseCities(file: String): List[City] = {
+        // Parse file into a list of cities
         val lines = Source.fromFile(file).getLines.toList
         var listBuffer = new ListBuffer[City]()
         var read = false
@@ -118,12 +127,13 @@
                 listBuffer += new City(cityInfo(0+shift).toInt, cityInfo(1+shift).toInt, cityInfo(2+shift).toInt)
             }
         }
-        cityList = listBuffer.toList
+        listBuffer.toList
     }
     
 
     def main(args: Array[String]): Unit = {
-        parseCities(args(0))
+        // Read .tsp file given as command line arg
+        cityList = parseCities(args(0))
 
         // The size of the simulation population
         val populationSize = 50
@@ -135,23 +145,24 @@
         val mutationRate = 0.015
 
         // The maximum number of generations for the simulation.
-        val maxGenerations = 100
+        val maxGenerations = 1000
 
         var generation = 1
         var population = new Population(populationSize, groupSize, mutationRate)
 
-        println("Initial distance " + population.tours.maxBy(_.fitness).distance)
+        println("Initial distance " + population.fittest.distance)
 
+        // Run evolution
         while (generation <= maxGenerations) {
-            //println("Generation " + generation)
+            println("Generation " + generation)
             population.evolve
             generation += 1
         }
 
-        println("Final distance " + population.tours.maxBy(_.fitness).distance)
+        println("Final distance " + population.fittest.distance)
 
         // Write out solution
-        val solution = population.tours.maxBy(_.fitness).cities
+        val solution = population.fittest.cities
         val writer = new PrintWriter(new File("a280tsp-gen-output.tsp"))
         writer.write("NAME : a280tsp-gen-output.tsp\n")
         writer.write("TYPE : TOUR\n")
