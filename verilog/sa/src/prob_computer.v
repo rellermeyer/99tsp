@@ -47,7 +47,7 @@ floating_point_mult m1(
 	.s_axis_a_tvalid(processing_q),
 	.s_axis_a_tdata(t_q),
 	.s_axis_b_tvalid(floatval_valid),
-	.s_axis_b_tdata(floatval),
+	.s_axis_b_tdata(floatval)
 );
 
 wire [31:0] exp_res;
@@ -77,6 +77,9 @@ assign out = {8'b0,1'b1,recip_data[22:0]}; // Cheap floating-to-fixed, because w
 assign out_valid = recip_valid;
 
 always @(*) begin
+	processing_d = processing_q;
+	diff_d = diff_q;
+	t_d = t_q;
 	if (processing_q) begin
 		if (recip_valid) begin
 			processing_d = 0;
