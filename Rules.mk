@@ -2,7 +2,7 @@ compile: $(SRC)
 	$(CC) $(CFLAGS) $<
 
 run: compile
-	$(RUNCMD) $(RUNFLAGS)
+	$(RUNCMD) $(RUNFLAGS) $(TEST_FILE)
 
 clean:
-	rm -f $(OBJ)	
+	rm -f $(OBJ)
