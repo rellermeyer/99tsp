@@ -1,6 +1,7 @@
 SRC:=2opt.rs
 OBJ:=2opt
 EXTENSION:=.tsp
+RUNCMD:=./2opt $(RUNFLAGS) $(TEST_FILE)$(EXTENSION)
 
 # Optional: For array output, add -printarray to RUNFLAGS
 # RUNFLAGS:=-printarray
