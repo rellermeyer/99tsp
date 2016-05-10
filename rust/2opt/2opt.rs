@@ -1,3 +1,6 @@
+//Kshitij Delvadiya
+//Rellermeyer CS345 Fall 2016
+
 use std::env;
 use std::io::Error;
 use std::io::prelude::*;
@@ -239,9 +242,19 @@ fn get_test_file() -> Result<String, Error> {
 
 	//Get test_file path. Does not need to be in main(). WOW.
 	let mut args_iterator = env::args();
+	let args_index;
 	if args_iterator.nth(1).is_some() {
 		//Path has been supplied. Reset iterator so it can be grabbed.
 		args_iterator = env::args();
+		let possible_run_flag = args_iterator.nth(1).unwrap();
+		if possible_run_flag == "-printarray" {
+			//test file path shoudl be at index 2 of args
+			args_index = 2;
+		}
+		else{
+			//test file path should be at index 1 of args
+			args_index = 1;
+		}
 	}
 	else {
 		println!("ERROR: No input file specified.");
@@ -251,7 +264,8 @@ fn get_test_file() -> Result<String, Error> {
 	//We know args_iterator.nth(1).is_some() == true so we can "safely" unwrap it.
 	//The unwrap function will get the result of success. 
 	//If the open errors, then the try! macro will return early
-	let mut test_file = try!(File::open(args_iterator.nth(1).unwrap()));
+	args_iterator = env::args();
+	let mut test_file = try!(File::open(args_iterator.nth(args_index).unwrap()));
 	let mut all_text = String::new();
 	//If the file is empty or corrupted, then read_to_string will return an error.
 	//So it is wrapped in a try! macro, which will early return an error
@@ -366,10 +380,10 @@ fn print_solution(solution_path : &[Node]){
 
 	//Check if flag -printarray was specified after testfile
 	let mut args_iterator = env::args();
-	if args_iterator.nth(2).is_some() {
+	if args_iterator.nth(1).is_some() {
 		//Flag has been specified. Reset iterator so it can be grabbed.
 		args_iterator = env::args();
-		let run_flag = args_iterator.nth(2).unwrap();
+		let run_flag = args_iterator.nth(1).unwrap();
 		if run_flag == "-printarray" {
 			print_array(solution_path);
 		}
