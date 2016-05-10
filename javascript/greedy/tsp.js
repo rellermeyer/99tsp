@@ -1,8 +1,12 @@
 /*
  *	Greedy TSP in JavaScript/NodeJS implemented by Brandon Dang	
  *
- *	npm install xml2js
+ *	npm install npm xml2js
  *	node tsp.js [input.xml] [startIndex]
+ *
+ *	or
+ *
+ *	make run
  */
 var file = process.argv[2]
 var s = parseInt(process.argv[3])
@@ -10,8 +14,8 @@ var s = parseInt(process.argv[3])
 var fs = require('fs')
 var parseString = require('xml2js').parseString
 
-if(!file.endsWith('.xml'))
-	throw 'ERR: expecting XML file input'
+//if(!file.endsWith('.xml'))
+//	throw 'ERR: expecting XML file input'
 
 var xml = fs.readFileSync(file)
 

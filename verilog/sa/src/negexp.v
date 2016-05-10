@@ -24,7 +24,8 @@ module negexp( // Input and output are in single precision floating point values
     input [31:0] inp,
     input inp_valid,
     output [31:0] out,
-    output out_valid
+    output out_valid,
+	 output [7:0] debug
     );
 
 // A single stage in our setup: result = 1.0 + A * B * C
@@ -72,10 +73,12 @@ floating_point_add stage1_add(
 // The logic to repeatadly run this stage
 reg [3:0] iters_left_q, iters_left_d;
 reg [31:0] out_q, out_d;
-reg out_valid_q, out_valid_d;
+reg out_valid_q, out_valid_d, finishing_q, finishing_d;
 
 assign out = out_q;
 assign out_valid = out_valid_q;
+
+assign debug = {iters_left_q, 1'b0, stage1_valid, stage2_valid, adder_valid};
 
 // 1, 0.5, 0.3333, 0.25
 localparam CONSTANT_TABLE = {32'h3f800000, 32'h3f000000, 32'h3eaaaaab, 32'h3e800000};
@@ -90,22 +93,28 @@ always @(*) begin
 	stage_start_d = 0;//stage_start_q;
 	out_d = out_q;
 	out_valid_d = 0;
+	finishing_d = 0;
 
 	if (iters_left_q == 0) begin
-		out_d = adder_res;
-		out_valid_d = 1;
+		if (finishing_q) begin
+			out_d = adder_res;
+			out_valid_d = 1;
+		end
 		if (inp_valid) begin
 			// We're ready to roll!
 			iters_left_d = 3;
 			a_d = inp;
 			b_d = `CONSTANT(4);
 			c_d = 32'h3f800000; // Start out at 1
+			stage_start_d = 1;
 		end
 	end else if (adder_valid) begin
 		// We have to setup the next round
 		iters_left_d = iters_left_q - 1;
 		b_d = adder_res;
 		c_d = `CONSTANT(iters_left_q);
+		stage_start_d = 1;
+		finishing_d = 1;
 	end
 end
 
@@ -119,6 +128,7 @@ always @(posedge clk) begin
 		iters_left_q <= iters_left_d;
 		out_q <= out_d;
 		out_valid_q <= out_valid_d;
+		finishing_q <= finishing_d;
 	end
 end
 
