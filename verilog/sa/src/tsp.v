@@ -31,12 +31,13 @@ module tsp #(
 	output ready_to_read,
 	output [7:0] debug,
 	output [PRECISION-1:0] best_distance,
-	output best_distance_valid
+	output best_distance_valid,
+	input [31:0] rng
 );
 
-reg wea_q, wea_d;
+reg wea_q, wea_d, web_q, web_d;
 reg [MAX_NODE_BITS-1:0] addra_q, addra_d, addrb_q, addrb_d;
-reg [PRECISION*2-1:0] dina_q, dina_d;
+reg [PRECISION*2-1:0] dina_q, dina_d, dinb_q, dinb_d;
 wire [PRECISION*2-1:0] douta, doutb;
 city_ram city_ram(
 	.clka(clk),
@@ -45,13 +46,13 @@ city_ram city_ram(
 	.dina(dina_q),
 	.douta(douta),
 	.clkb(clk),
-	.web(1'b0),
+	.web(web_q),
 	.addrb(addrb_q),
-	.dinb(64'b0),
+	.dinb(dinb_q),
 	.doutb(doutb)
 );
 
-reg sqrt_inp_valid_q, sqrt_inp_valid_d;
+/*reg sqrt_inp_valid_q, sqrt_inp_valid_d;
 reg [PRECISION-1:0] sqrt_inp_q, sqrt_inp_d;
 wire [23:0] sqrt_out;
 wire sqrt_out_valid;
@@ -61,6 +62,20 @@ cordic_sqrt sqrt (
   .m_axis_dout_tvalid(sqrt_out_valid),
   .s_axis_cartesian_tdata(sqrt_inp_q),
   .m_axis_dout_tdata(sqrt_out)
+);*/
+
+reg [PRECISION-1:0] distcomp_inp_a_q, distcomp_inp_a_d, distcomp_inp_b_q, distcomp_inp_b_d;
+reg distcomp_inp_valid_q, distcomp_inp_valid_d;
+wire [PRECISION-1:0] distcomp_out;
+wire distcomp_out_valid;
+distance distcomp(
+	.clk(clk),
+	.rst(rst),
+	.citya(distcomp_inp_a_q),
+	.cityb(distcomp_inp_b_q),
+	.inp_valid(distcomp_inp_valid_q),
+	.out_valid(distcomp_out_valid),
+	.out(distcomp_out)
 );
 
 localparam STATE_IDLE = 0,
@@ -75,8 +90,13 @@ localparam STATE_IDLE = 0,
 	STATE_WAIT_FOR_SQRT_RESULT = 9,
 	STATE_DONE_SOLVING = 10,
 	STATE_INCR_ADDR = 11,
-	STATE_DELAY = 12;
-reg [3:0] state_q, state_d, nextstate_q, nextstate_d;
+	STATE_DELAY = 12,
+	//STATE_COMPUTE_DX_DY = 13,
+	STATE_LOADING_CITY_1 = 14,
+	STATE_LOADED_FIRST_CITIES = 15,
+	STATE_LOADED_SECOND_CITIES = 16,
+	STATE_PIPING_DISTANCES = 17;
+reg [4:0] state_q, state_d, nextstate_q, nextstate_d;
 
 reg has_read_prolog_q, has_read_prolog_d;
 reg [MAX_NODE_BITS-1:0] nnodes_in_file_q, nnodes_in_file_d;
@@ -93,16 +113,47 @@ reg [PRECISION-1:0] total_dist_q, total_dist_d;
 assign best_distance = total_dist_q;
 assign best_distance_valid = (state_q == STATE_DONE_SOLVING);
 
+reg [PRECISION*2-1:0] city1_q, city1_d, city2_q, city2_d, city3_q, city3_d, city4_q, city4_d;
+
 `define LASTCHAR ((read_string_q>>((string_len_q-1)*8))&8'hFF)
 `define X(v) (v[PRECISION-1:0])
 `define Y(v) (v[PRECISION*2-1:PRECISION])
 
-assign debug = {sqrt_inp_q[1:0], total_dist_q[5:0]};//total_dist_q[7:0];//string_len_q;//{state_q[2:0], has_read_prolog_q, nextstate_q[2:0], 1'b0};//nnodes_in_file_q[7:0];//((read_string_q>>((string_len_q-1)*8))&8'hFF);//{string_len_q[3:0],nnodes_in_file_q[3:0]};
+assign debug = {2'b0, total_dist_q[5:0]};//total_dist_q[7:0];//string_len_q;//{state_q[2:0], has_read_prolog_q, nextstate_q[2:0], 1'b0};//nnodes_in_file_q[7:0];//((read_string_q>>((string_len_q-1)*8))&8'hFF);//{string_len_q[3:0],nnodes_in_file_q[3:0]};
 
-wire [PRECISION-1:0] dx, dy, dist_squared;
-assign dx = `X(doutb)-`X(douta);
-assign dy = `Y(doutb)-`Y(douta);
-assign dist_squared = dx*dx + dy*dy;
+//reg [PRECISION-1:0] dx_q, dx_d, dy_q, dy_d;
+//wire [PRECISION-1:0] dx, dy, dist_squared;
+//assign dx = `X(doutb)-`X(douta);
+//assign dy = `Y(doutb)-`Y(douta);
+//assign dist_squared = dx*dx + dy*dy;
+reg [2:0] pipe_tx_ctr_q, pipe_tx_ctr_d, pipe_rx_ctr_q, pipe_rx_ctr_d;
+reg [PRECISION*5*2-1:0] pipe_tx_buf_a_q, pipe_tx_buf_a_d, pipe_tx_buf_b_q, pipe_tx_buf_b_d;
+reg [PRECISION*5-1:0] pipe_rx_buf_q, pipe_rx_buf_d;
+
+reg [63:0] temperature_q, temperature_d;
+
+wire [63:0] new_temperature;
+floating_point_mult_double temp_mult(
+	.aclk(clk),
+	.s_axis_a_tdata(temperature_q),
+	.s_axis_a_tvalid(1),
+	.s_axis_b_tdata(64'h3FEFFFFFCA501ACB), // 0.9999999 in double-precision IEEE753
+	.s_axis_b_tvalid(1),
+	.m_axis_result_tdata(new_temperature),
+	.m_axis_result_tvalid()
+);
+
+// We modulo the RNG value by the number of nodes we're handling
+wire [47:0] rng_mod;
+div_mod rng_divider(
+	.aclk(clk),
+	.s_axis_divisor_tvalid(nnodes_in_file_q==0?0:1),
+	.s_axis_divisor_tdata(nnodes_in_file_q),
+	.s_axis_dividend_tvalid(1),
+	.s_axis_dividend_tdata(rng),
+	.m_axis_dout_tvalid(),
+	.m_axis_dout_tdata(rng_mod)
+);
 
 always @(*) begin
 	has_read_prolog_d = has_read_prolog_q;
@@ -120,11 +171,30 @@ always @(*) begin
 	dina_d = dina_q;
 	addrb_d = addrb_q;
 	read_y_d = read_y_q;
+	dinb_d = dinb_q;
+	web_d = 0;
 	
-	sqrt_inp_d = sqrt_inp_q;
-	sqrt_inp_valid_d = 0;
+	//sqrt_inp_d = sqrt_inp_q;
+	//sqrt_inp_valid_d = 0;
+	distcomp_inp_a_d = distcomp_inp_a_q;
+	distcomp_inp_b_d = distcomp_inp_b_q;
+	distcomp_inp_valid_d = 0;
 	total_dist_d = total_dist_q;
 	delay_ctr_d = delay_ctr_q;
+	/*dx_d = dx_q;
+	dy_d = dy_q;*/
+	city1_d = city1_q;
+	city2_d = city2_q;
+	city3_d = city3_q;
+	city4_d = city4_q;
+	
+	pipe_tx_ctr_d = pipe_tx_ctr_q;
+	pipe_tx_buf_a_d = pipe_tx_buf_a_q;
+	pipe_tx_buf_b_d = pipe_tx_buf_b_q;
+	pipe_rx_ctr_d = pipe_rx_ctr_q;
+	pipe_rx_buf_d = pipe_rx_buf_q;
+	
+	temperature_d = temperature_q;
 		
 	case (state_q)
 	STATE_IDLE: begin
@@ -252,10 +322,18 @@ always @(*) begin
 			delay_ctr_d = delay_ctr_q - 1;
 		end
 	end
+	/*STATE_COMPUTE_DX_DY: begin
+		dx_d = `X(doutb)-`X(douta);
+		dy_d = `Y(doutb)-`Y(douta);
+		state_d = STATE_COMPUTE_TOTAL_DISTANCE;
+	end*/
 	STATE_COMPUTE_TOTAL_DISTANCE: begin
 		// Load the next two cities
-		sqrt_inp_d = dist_squared;//(`X(doutb)-`X(douta))*(`X(doutb)-`X(douta))+(`Y(doutb)-`Y(douta))*(`Y(doutb)-`Y(douta));
-		sqrt_inp_valid_d = 1;
+		distcomp_inp_a_d = douta;
+		distcomp_inp_b_d = doutb;
+		distcomp_inp_valid_d = 1;
+		//sqrt_inp_d = dx_q*dx_q + dy_q*dy_q;//dist_squared;//(`X(doutb)-`X(douta))*(`X(doutb)-`X(douta))+(`Y(doutb)-`Y(douta))*(`Y(doutb)-`Y(douta));
+		//sqrt_inp_valid_d = 1;
 		state_d = STATE_WAIT_FOR_SQRT_RESULT;
 		addra_d = addra_q + 1;
 		if (addrb_q == 0) begin
@@ -271,14 +349,83 @@ always @(*) begin
 		end
 	end
 	STATE_WAIT_FOR_SQRT_RESULT: begin
-		if (sqrt_out_valid) begin
+		if (distcomp_out_valid) begin
 			// Done waiting! Add to accumulator
-			total_dist_d = total_dist_q + sqrt_out;
+			total_dist_d = total_dist_q + distcomp_out;
 			state_d = nextstate_q;//STATE_COMPUTE_TOTAL_DISTANCE;
 		end
 	end
 	STATE_DONE_SOLVING: begin
 		state_d = STATE_IDLE;
+	end
+
+	// Now the actual SA part - pick two cities to swap, see if they're better, repeat.
+	// Pick a city to swap - there are 4 cities we need to know about overall.
+	STATE_LOADING_CITY_1: begin
+		// Update the temperature
+		// we may need to compute e^(-(new-old)/T) = e^((old-new)/T), so start computing 1/T
+		temperature_d = new_temperature;
+
+		// Pick a city to swap with the next one. (TODO: modulo)
+		addra_d = rng_mod[MAX_NODE_BITS-1:0]-1;
+		addrb_d = rng_mod[MAX_NODE_BITS-1:0];
+		nextstate_d = STATE_LOADED_FIRST_CITIES;
+		state_d = STATE_DELAY;
+		delay_ctr_d = 1;
+	end
+	STATE_LOADED_FIRST_CITIES: begin
+		// Save these values, load the next two.
+		city1_d = douta;
+		city2_d = doutb; // Load these into the distance computer
+		addra_d = addra_q + 2;
+		addrb_d = addrb_q + 2;
+		nextstate_d = STATE_LOADED_SECOND_CITIES;
+		state_d = STATE_DELAY;
+		delay_ctr_d = 1;
+	end
+	STATE_LOADED_SECOND_CITIES: begin
+		city3_d = douta;
+		city4_d = doutb;
+
+		// Change addra and addrb in preparation for a possible swap
+		addra_d = addra_q - 1;
+		addrb_d = addrb_q - 1;
+
+		// Load these into the distance computer.
+		// We have 4 distances to compute: 1-2, 3-4, and 1-3, 2-4 (2-3 equals 3-2, so we don't need to know it)
+		pipe_tx_ctr_d = 4;
+		pipe_tx_buf_a_d = {city1_q, city3_q, city1_q, city2_q};
+		pipe_tx_buf_b_d = {city2_q, city4_q, city3_q, city4_q};
+		pipe_rx_ctr_d = 4;
+		pipe_rx_buf_d = 0;
+	end
+	STATE_PIPING_DISTANCES: begin
+		if (pipe_tx_ctr_q > 0) begin
+			// We have more to pipe in
+			distcomp_inp_a_d = pipe_tx_buf_a_q[63:0];
+			pipe_tx_buf_a_d = pipe_tx_buf_a_q >> 64;
+			distcomp_inp_b_d = pipe_tx_buf_b_q[63:0];
+			pipe_tx_buf_b_d = pipe_tx_buf_b_q >> 64;
+			distcomp_inp_valid_d = 1;
+		end
+		if (distcomp_out_valid && pipe_rx_ctr_q > 0) begin
+			pipe_rx_ctr_d = pipe_rx_ctr_q - 1;
+			pipe_rx_buf_d = (pipe_rx_buf_q << 64) | distcomp_out;
+		end
+		if (pipe_rx_ctr_q == 0) begin
+			// We know all the distances, is old >= new?
+			if (pipe_rx_buf_q[127:96]+pipe_rx_buf_q[95:64] >= pipe_rx_buf_q[63:32]+pipe_rx_buf_q[31:0]) begin
+				// Swap, we don't have to do complicated math.
+				dina_d = city3_q;
+				wea_d = 1;
+				dinb_d = city2_q;
+				web_d = 1;
+				state_d = STATE_LOADING_CITY_1; // Repeat
+			end else begin
+				// We have to compute e^((old-new)/T). Or not.
+				state_d = STATE_LOADING_CITY_1;
+			end
+		end
 	end
 	endcase
 end
@@ -311,10 +458,27 @@ always @(posedge clk) begin
 		addra_q <= addra_d;
 		read_y_q <= read_y_d;
 		total_dist_q <= total_dist_d;
-		sqrt_inp_valid_q <= sqrt_inp_valid_d;
-		sqrt_inp_q <= sqrt_inp_d;
+		/*sqrt_inp_valid_q <= sqrt_inp_valid_d;
+		sqrt_inp_q <= sqrt_inp_d;*/
 		addrb_q <= addrb_d;
 		delay_ctr_q <= delay_ctr_d;
+		/*dx_q <= dx_d;
+		dy_q <= dy_d;*/
+		distcomp_inp_a_q <= distcomp_inp_a_d;
+		distcomp_inp_b_q <= distcomp_inp_b_d;
+		distcomp_inp_valid_q <= distcomp_inp_valid_d;
+		city1_q <= city1_d;
+		city2_q <= city2_d;
+		city3_q <= city3_d;
+		city4_q <= city4_d;
+		pipe_tx_ctr_q <= pipe_tx_ctr_d;
+		pipe_tx_buf_a_q <= pipe_tx_buf_a_d;
+		pipe_tx_buf_b_q <= pipe_tx_buf_b_d;
+		pipe_rx_ctr_q <= pipe_rx_ctr_d;
+		pipe_rx_buf_q <= pipe_rx_buf_d;
+		temperature_q <= temperature_d;
+		dinb_q <= dinb_d;
+		web_q <= web_d;
 	end
 end
 
