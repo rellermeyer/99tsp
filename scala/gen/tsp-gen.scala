@@ -2,7 +2,7 @@
  * Quinten McNamara
  * CS 345 - Assignment 6
  *
- * Description of algorithm from http://www.lalena.com/AI/Tsp/ and 
+ * Description of algorithm from
  * http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-travelling-salesman-problem/5
  *
  */
@@ -20,59 +20,49 @@
             tours(i) = new Tour(true)
         }
 
-        def evolve: Unit = {
-            var group = selection
+        def evolve = {
+            var newTours = new Array[Tour](size)
+            newTours(0) = tours.maxBy(_.fitness) // Elitism
+            for (i <- 1 until size) {
+                val parent1 = selection
+                val parent2 = selection
 
-            group = group.sortWith(_.fitness > _.fitness)
-            val parent1 = group.take(2)(0)
-            val parent2 = group.take(2)(1)
+                var child = crossover(parent1, parent2)
+                child = mutate(child)
 
-            var replace1 = group.reverse.take(2)(0)
-            var replace2 = group.reverse.take(2)(1)
-
-            var child1 = crossover(parent1, parent2)
-            if (Random.nextDouble < mutationRate) {
-                child1 = mutate(child1)
+                newTours(i) = child
             }
-            var child2 = crossover(parent2, parent1)
-            if (Random.nextDouble < mutationRate) {
-                child2 = mutate(child2)
-            }
-            
-            replace1 = child1
-            replace2 = child2
+            tours = newTours
         }
 
-        def mutate(chromosome: Tour): Tour = {
-            chromosome.cities = Random.shuffle(chromosome.cities)
-            return chromosome
+        def mutate(t: Tour): Tour = {
+            for (i <- t.cities.indices) {
+                if (Random.nextDouble < mutationRate) {
+                    val swapPos =  Random.nextInt(t.cities.length)
+                    // Swap two cities
+                    var arr = t.cities.toArray
+                    val temp = arr(i)
+                    arr(i) = arr(swapPos)
+                    arr(swapPos) = temp
+                    t.cities = arr.toList
+                }
+            }
+            return t
         }
 
         def crossover(p1: Tour, p2: Tour): Tour = {
             var child = new Tour(false);
 
-            // Get start and end sub tour positions for parent1's tour
-            val crossPos = (Random.nextDouble * p1.cities.length).toInt
+            val crossPos = Random.nextInt(p1.cities.length)
+            val leftSlice = p1.cities.slice(0, crossPos)
+            val rightSlice = (p2.cities.toSet -- leftSlice.toSet).toList
 
-            // Temporary buffer to hold child's cities
-            var listBuffer = ListBuffer[City]()
-
-            // Loop and add the sub tour from parent1 to our child
-            for (i <- 0 until crossPos) {
-                listBuffer += p1.cities(i)
-            }
-
-            val remaining = (p2.cities.toSet -- listBuffer.toSet).toList
-            // Loop through parent2's city tour
-            for (city <- remaining) {
-                listBuffer += city
-            }
-            child.cities = listBuffer.toList
+            child.cities = leftSlice:::rightSlice
             return child
         }
 
-        def selection: List[Tour] = {
-            return Random.shuffle(tours.toList).take(groupSize)
+        def selection: Tour = {
+            return Random.shuffle(tours.toList).take(groupSize).maxBy(_.fitness)
         }
     }
 
@@ -136,28 +126,32 @@
         parseCities(args(0))
 
         // The size of the simulation population
-        val populationSize = 10000
+        val populationSize = 50
 
         // Number of random tours chosen from population each generation
-        val groupSize = 10
+        val groupSize = 5
 
         // The percentage that each child after crossover will undergo mutation
-        val mutationRate = 0.03
+        val mutationRate = 0.015
 
         // The maximum number of generations for the simulation.
-        val maxGenerations = 10000
+        val maxGenerations = 100
 
         var generation = 1
         var population = new Population(populationSize, groupSize, mutationRate)
 
+        println("Initial distance " + population.tours.maxBy(_.fitness).distance)
+
         while (generation <= maxGenerations) {
-            println("Generation " + generation)
+            //println("Generation " + generation)
             population.evolve
             generation += 1
         }
 
+        println("Final distance " + population.tours.maxBy(_.fitness).distance)
+
         // Write out solution
-        val solution = population.tours.sortWith(_.fitness > _.fitness)(0).cities
+        val solution = population.tours.maxBy(_.fitness).cities
         val writer = new PrintWriter(new File("a280tsp-gen-output.tsp"))
         writer.write("NAME : a280tsp-gen-output.tsp\n")
         writer.write("TYPE : TOUR\n")
