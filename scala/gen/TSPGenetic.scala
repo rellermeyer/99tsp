@@ -133,7 +133,12 @@
 
     def main(args: Array[String]): Unit = {
         // Read .tsp file given as command line arg
-        cityList = parseCities(args(0))
+        try { 
+            cityList = parseCities(args(0))
+        } catch {
+            case ioe: IOException => println("IOException occurred") ; System.exit(0)
+            case ex: FileNotFoundException  => println("File not found") ; System.exit(0)
+        }
 
         // The size of the simulation population
         val populationSize = 50
@@ -154,7 +159,6 @@
 
         // Run evolution
         while (generation <= maxGenerations) {
-            println("Generation " + generation)
             population.evolve
             generation += 1
         }
