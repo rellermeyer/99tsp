@@ -1,4 +1,3 @@
-#![allow(warnings)]
 use std::env;
 use std::io::Error;
 use std::io::prelude::*;
@@ -25,7 +24,7 @@ fn main() {
 
 	//Get the text in the test file.
 	//The only way to get a value out of an enum is pattern matching.
-	let mut all_text : String = match get_test_file() {
+	let all_text : String = match get_test_file() {
 		Ok(text) => text,
 		Err(error) => file_read_error(error),
 	};
@@ -33,7 +32,7 @@ fn main() {
 
 	//Parse the text in the input file. See function for more details.
 	//Type declaration here is optional, it will be inferred from return type of parse()
-	let mut path : Vec<Node> = parse(all_text);
+	let path : Vec<Node> = parse(all_text);
 
 	//Save the original distance for comparision later.
 	let original_distance = total_distance(&path);
@@ -263,8 +262,9 @@ fn get_test_file() -> Result<String, Error> {
 }
 
 //To satisfy types, this returns a string. But it will just exit.
-fn file_read_error(error:Error) -> String {
-	println!("ERROR: File cannot be read.");
+fn file_read_error(error: Error) -> String {
+	println!("ERROR: File cannot be opened/read.");
+	println!("{:?}", error);
 	exit(0);
 }
 
