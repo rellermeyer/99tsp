@@ -19,17 +19,17 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module prob_computer(
-    input clk,
-    input rst,
-    input [31:0] new,
-    input [31:0] old,
-    input [31:0] Tinv,
-    input inp_valid,
-    output [31:0] out,
-    output out_valid
-    );
+	input clk,
+	input rst,
+	input [31:0] new,
+	input [31:0] old,
+	input [31:0] Tinv,
+	input inp_valid,
+	output [31:0] out,
+	output out_valid
+);
 
-// The circuitry to compute e^-((new-old)/T)
+// The circuitry to compute e^-((new-old)/T) = 1 / (e^((new-old)*(1/T)))
 reg [31:0] diff_q, diff_d, t_q, t_d;
 reg processing_q, processing_d;
 wire [31:0] floatval;
@@ -42,12 +42,16 @@ fixed2float f2f(
 	.m_axis_result_tdata(floatval)
 );
 
+wire [31:0] floatval2_data;
+wire floatval2_valid;
 floating_point_mult m1(
 	.aclk(clk),
 	.s_axis_a_tvalid(processing_q),
 	.s_axis_a_tdata(t_q),
 	.s_axis_b_tvalid(floatval_valid),
-	.s_axis_b_tdata(floatval)
+	.s_axis_b_tdata(floatval),
+	.m_axis_result_tvalid(floatval2_valid),
+	.m_axis_result_tdata(floatval2_data)
 );
 
 wire [31:0] exp_res;
@@ -56,8 +60,8 @@ wire exp_res_valid;
 negexp negexp(
 	.clk(clk),
 	.rst(rst),
-	.inp(floatval),
-	.inp_valid(floatval_valid),
+	.inp(floatval2_data),
+	.inp_valid(floatval2_valid),
 	.out(exp_res),
 	.out_valid(exp_res_valid),
 	.debug(exp_debug)

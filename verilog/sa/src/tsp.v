@@ -64,7 +64,7 @@ cordic_sqrt sqrt (
   .m_axis_dout_tdata(sqrt_out)
 );*/
 
-reg [PRECISION-1:0] distcomp_inp_a_q, distcomp_inp_a_d, distcomp_inp_b_q, distcomp_inp_b_d;
+reg [2*PRECISION-1:0] distcomp_inp_a_q, distcomp_inp_a_d, distcomp_inp_b_q, distcomp_inp_b_d;
 reg distcomp_inp_valid_q, distcomp_inp_valid_d;
 wire [PRECISION-1:0] distcomp_out;
 wire distcomp_out_valid;
@@ -96,7 +96,8 @@ localparam STATE_IDLE = 0,
 	STATE_LOADED_FIRST_CITIES = 15,
 	STATE_LOADED_SECOND_CITIES = 16,
 	STATE_PIPING_DISTANCES = 17,
-	STATE_WAITING_PC = 18;
+	STATE_WAITING_PC = 18,
+	STATE_COMPUTED_TOTDIST = 19;
 reg [4:0] state_q, state_d, nextstate_q, nextstate_d;
 
 reg has_read_prolog_q, has_read_prolog_d;
@@ -128,34 +129,54 @@ assign debug = {2'b0, total_dist_q[5:0]};//total_dist_q[7:0];//string_len_q;//{s
 //assign dy = `Y(doutb)-`Y(douta);
 //assign dist_squared = dx*dx + dy*dy;
 reg [2:0] pipe_tx_ctr_q, pipe_tx_ctr_d, pipe_rx_ctr_q, pipe_rx_ctr_d;
-reg [PRECISION*5*2-1:0] pipe_tx_buf_a_q, pipe_tx_buf_a_d, pipe_tx_buf_b_q, pipe_tx_buf_b_d;
-reg [PRECISION*5-1:0] pipe_rx_buf_q, pipe_rx_buf_d;
+reg [PRECISION*4*2-1:0] pipe_tx_buf_a_q, pipe_tx_buf_a_d, pipe_tx_buf_b_q, pipe_tx_buf_b_d;
+reg [PRECISION*4-1:0] pipe_rx_buf_q, pipe_rx_buf_d;
 
 // This is actually 1/T, to optimize (new-old)/T to (new-old)*T, which is much faster
-reg [63:0] temperature_q, temperature_d;
+reg [31:0] temperature_q, temperature_d;
 
-wire [63:0] new_temperature;
-floating_point_mult_double temp_mult(
+wire [31:0] new_temperature;
+floating_point_mult temp_mult(
 	.aclk(clk),
 	.s_axis_a_tdata(temperature_q),
-	.s_axis_a_tvalid(1),
-	.s_axis_b_tdata(64'h3FF0000002AF31DC), // 1.0000001 in double-precision IEEE753
-	.s_axis_b_tvalid(1),
+	.s_axis_a_tvalid(1'b1),
+	.s_axis_b_tdata(32'h3f800008), // 1.0000001 in single-precision IEEE753
+	.s_axis_b_tvalid(1'b1),
 	.m_axis_result_tdata(new_temperature),
 	.m_axis_result_tvalid()
 );
+/*floating_point_mult_double temp_mult(
+	.aclk(clk),
+	.s_axis_a_tdata(temperature_q),
+	.s_axis_a_tvalid(1'b1),
+	.s_axis_b_tdata(64'h3FF0000002AF31DC), // 1.0000001 in double-precision IEEE753
+	.s_axis_b_tvalid(1'b1),
+	.m_axis_result_tdata(new_temperature),
+	.m_axis_result_tvalid()
+);*/
 
 // We modulo the RNG value by the number of nodes we're handling
 wire [47:0] rng_mod;
 div_mod rng_divider(
 	.aclk(clk),
-	.s_axis_divisor_tvalid(nnodes_in_file_q==0?0:1),
-	.s_axis_divisor_tdata(nnodes_in_file_q),
-	.s_axis_dividend_tvalid(1),
+	.s_axis_divisor_tvalid(nnodes_in_file_q==0?1'b0:1'b1),
+	.s_axis_divisor_tdata({3'b0,nnodes_in_file_q}),
+	.s_axis_dividend_tvalid(1'b1),
 	.s_axis_dividend_tdata(rng),
 	.m_axis_dout_tvalid(),
 	.m_axis_dout_tdata(rng_mod)
 );
+
+// Convert 1/T from double to single
+wire [31:0] temp_single_prec;
+assign temp_single_prec = new_temperature;
+/*floating_point_d2s d2s(
+	.aclk(clk),
+	.s_axis_a_tvalid(1'b1),
+	.s_axis_a_tdata(temperature_q),
+	.m_axis_result_tvalid(),
+	.m_axis_result_tdata(temp_single_prec)
+);*/
 
 reg [PRECISION-1:0] pc_new_q, pc_new_d, pc_old_q, pc_old_d;
 reg pc_valid_q, pc_valid_d;
@@ -166,7 +187,7 @@ prob_computer probputer(
 	.rst(rst),
 	.new(pc_new_q),
 	.old(pc_old_q),
-	.Tinv(temperature_q),
+	.Tinv(temp_single_prec),
 	.inp_valid(pc_valid_q),
 	.out(pc_out),
 	.out_valid(pc_out_valid)
@@ -226,6 +247,7 @@ always @(*) begin
 		has_read_prolog_d = 0;
 		string_len_d = 0;
 		read_string_d = 0;
+		total_dist_d = 0;
 	end
 	STATE_READING_FILE: begin
 		ready_to_read_d = 1;
@@ -241,6 +263,7 @@ always @(*) begin
 							state_d = STATE_CONSUMING_NUMBER;
 							numbuf_size_d = 0;
 							ready_to_read_d = 0;
+							num_buffer_d = 0;
 						//end else if (read_string_q[(18*8)-1:0] == 144'h4e4f49544345535f44524f4f435f45444f4e) begin // "NODE_COORD_SECTION"
 						end else if (read_string_q[7:0] == 8'h4e) begin
 							has_read_prolog_d = 1;
@@ -426,10 +449,12 @@ always @(*) begin
 		pipe_tx_buf_b_d = {city2_q, city4_q, city3_q, city4_q};
 		pipe_rx_ctr_d = 4;
 		pipe_rx_buf_d = 0;
+		state_d = STATE_PIPING_DISTANCES;
 	end
 	STATE_PIPING_DISTANCES: begin
 		if (pipe_tx_ctr_q > 0) begin
 			// We have more to pipe in
+			pipe_tx_ctr_d = pipe_tx_ctr_q - 1;
 			distcomp_inp_a_d = pipe_tx_buf_a_q[63:0];
 			pipe_tx_buf_a_d = pipe_tx_buf_a_q >> 64;
 			distcomp_inp_b_d = pipe_tx_buf_b_q[63:0];
@@ -438,7 +463,7 @@ always @(*) begin
 		end
 		if (distcomp_out_valid && pipe_rx_ctr_q > 0) begin
 			pipe_rx_ctr_d = pipe_rx_ctr_q - 1;
-			pipe_rx_buf_d = (pipe_rx_buf_q << 64) | distcomp_out;
+			pipe_rx_buf_d = (pipe_rx_buf_q << 32) | distcomp_out;
 		end
 		if (pipe_rx_ctr_q == 0) begin
 			// We know all the distances, is old >= new?
