@@ -157,11 +157,14 @@ floating_point_mult temp_mult(
 
 // We modulo the RNG value by the number of nodes we're handling
 wire [47:0] rng_mod;
+wire rngmod_tready;
 div_mod rng_divider(
 	.aclk(clk),
 	.s_axis_divisor_tvalid(nnodes_in_file_q==0?1'b0:1'b1),
+	.s_axis_divisor_tready(rngmod_tready),
 	.s_axis_divisor_tdata({3'b0,nnodes_in_file_q}),
-	.s_axis_dividend_tvalid(1'b1),
+	.s_axis_dividend_tvalid(rngmod_tready),
+	.s_axis_dividend_tready(),
 	.s_axis_dividend_tdata(rng),
 	.m_axis_dout_tvalid(),
 	.m_axis_dout_tdata(rng_mod)

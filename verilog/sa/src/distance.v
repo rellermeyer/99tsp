@@ -30,17 +30,17 @@ module distance(
 
 reg sqrt_inp_valid_q, sqrt_inp_valid_d;
 reg [31:0] sqrt_inp_q, sqrt_inp_d;
-wire [16:0] sqrt_out;
+wire [12:0] sqrt_out;
 wire sqrt_out_valid;
 cordic_sqrt sqrt (
   .aclk(clk),
   .s_axis_cartesian_tvalid(sqrt_inp_valid_q),
   .m_axis_dout_tvalid(sqrt_out_valid),
-  .s_axis_cartesian_tdata({8'b0,sqrt_inp_q}),
+  .s_axis_cartesian_tdata(sqrt_inp_q[23:0]),
   .m_axis_dout_tdata(sqrt_out)
 );
 
-assign out = {15'b0,sqrt_out};
+assign out = {19'b0,sqrt_out};
 assign out_valid = sqrt_out_valid;
 
 `define X(v) (v[31:0])

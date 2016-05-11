@@ -47,31 +47,6 @@ floating_point_mult fmult(
 	.m_axis_result_tdata(fmult_tdata)
 );
 
-/*//wire stage1_valid;
-wire [31:0] stage1_res;
-wire stage1_valid;
-floating_point_mult stage1(
-	.aclk(clk),
-	.s_axis_a_tvalid(stage_start_q),
-	.s_axis_a_tdata(a_q),
-	.s_axis_b_tvalid(1'b1),
-	.s_axis_b_tdata(b_q),
-	.m_axis_result_tvalid(stage1_valid),
-	.m_axis_result_tdata(stage1_res)
-);
-
-//wire stage2_valid;
-wire [31:0] stage2_res;
-floating_point_mult stage2(
-	.aclk(clk),
-	.s_axis_a_tvalid(stage1_valid),
-	.s_axis_a_tdata(stage1_res),
-	.s_axis_b_tvalid(1'b1),
-	.s_axis_b_tdata(c_q),
-	.m_axis_result_tvalid(stage2_valid),
-	.m_axis_result_tdata(stage2_res)
-);*/
-
 reg [31:0] adder_in_q, adder_in_d;
 reg adder_start_q, adder_start_d;
 wire adder_valid;
