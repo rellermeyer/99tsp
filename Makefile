@@ -1,5 +1,6 @@
-MODULES:=java/dummy 
+MODULES:=java/dummy
 #cpp/greedy
+#rust/2opt
 
 TSPLIB_MIRROR:=http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95
 TSPLIB:=$(TSPLIB_MIRROR)/tsp
