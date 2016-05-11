@@ -138,11 +138,11 @@ def performSimulatedAnnealing(listOfNodes, startingTemp, numIterations, coolingR
 	s = copy.deepcopy(listOfNodes)
 
 	# Create a random initial state.
-	for i in range (0, 5000):
+	for i in range (0, 500):
 		s = getNeighborTour(s)
 
 	# This is the initial cost.
-	print "INITIAL COST: ", tourDistance(s)
+	#print "INITIAL COST: ", tourDistance(s)
 
 	# The best tour yet is the initial one to start.
 	# Must deep copy to kill the reference.
@@ -189,14 +189,25 @@ def main():
 
 	# Parse the TSP input file. Get a list of Nodes, where each Node
 	# represents a location in the TSP problem within the file.
-	print "Parsing file: ", sys.argv[1]
+	#print "Parsing file: ", sys.argv[1]
 	listOfNodes = parseTSPFile(sys.argv[1])
 
+
+	#########################################################
+	# Example experiment with:
+	#      initial temperature:  200,000
+	#      number of iterations: 40,000
+	#      cooling rate:         .999
+	#########################################################
+
 	# Get a solution to TSP via the simulated annealing algorithm.
-	
-	# 8458
-	#solutionList = performSimulatedAnnealing(listOfNodes, 200000, 40000, .999)
-	#print tourDistance(solutionList)
+	solutionList = performSimulatedAnnealing(listOfNodes, 200000, 40000, .999)
+	print 'Solution tour distance: ', tourDistance(solutionList)
+
+
+	########################################
+	# Experimental data below.
+	########################################
 
 	# 8359
 	#solutionList = performSimulatedAnnealing(listOfNodes, 200000, 40000, .99)
