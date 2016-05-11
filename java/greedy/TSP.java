@@ -86,49 +86,37 @@ public class TSP
     }
 
     public static void solve(ArrayList<Node> nodeList)
-    {
-        double minTotalDistance = Double.MAX_VALUE; 
-        ArrayList<Node> optSolutionNodes = new ArrayList<Node>();
-        
-        //We attempt the greedy solution on every possible start node
-        for (int i = 0; i < nodeList.size(); i++)
-        { 
-            //copy the list of nodes
-            ArrayList<Node> nodes = new ArrayList<Node>(nodeList);
-            double totalDistance = 0;
-            //we build up the solution in the following list
-            ArrayList<Node> solutionNodes = new ArrayList<Node>();
-            //start node
-            Node currentNode = nodeList.get(i);
-            solutionNodes.add(currentNode);
-            nodes.remove(i);
-            while(nodes.size() > 0)
-            {
-                currentNode = solutionNodes.get(solutionNodes.size() - 1);
-                Node nearestNeighbor = getNearestNeighbor(currentNode, nodes);
-                double minDistance = distance(currentNode, nearestNeighbor);
-                solutionNodes.add(nearestNeighbor);
-                nodes.remove(nearestNeighbor);
-                totalDistance += minDistance;
-            }
-            totalDistance += distance(solutionNodes.get(solutionNodes.size() - 1), solutionNodes.get(0));
-            //choose the solution with the optimal start node
-            if (totalDistance < minTotalDistance)
-            {
-                minTotalDistance = totalDistance;
-                optSolutionNodes = solutionNodes;
-            }   
+    { 
+        //copy the list of nodes
+        ArrayList<Node> nodes = new ArrayList<Node>(nodeList);
+        double totalDistance = 0;
+        //we build up the solution in the following list
+        ArrayList<Node> solutionNodes = new ArrayList<Node>();
+        int random = (int) (Math.random() * nodes.size());
+        //choose a random start node
+        Node currentNode = nodeList.get(random);
+        solutionNodes.add(currentNode);
+        nodes.remove(random);
+        while(nodes.size() > 0)
+        {
+            currentNode = solutionNodes.get(solutionNodes.size() - 1);
+            Node nearestNeighbor = getNearestNeighbor(currentNode, nodes);
+            double minDistance = distance(currentNode, nearestNeighbor);
+            solutionNodes.add(nearestNeighbor);
+            nodes.remove(nearestNeighbor);
+            totalDistance += minDistance;
         }
+        totalDistance += distance(solutionNodes.get(solutionNodes.size() - 1), solutionNodes.get(0));
         /*
         Print out the solution
         Line 1: total distance of solution cycle
         Next Lines: print out nodes in order of cycle path
         Final Line: print out -1, indicating end of solution output, consistent with a280.opt.tour file
         */ 
-        System.out.println("Distance: " + minTotalDistance);
-        for (int i = 0; i < optSolutionNodes.size(); i++)
+        System.out.println("Distance: " + totalDistance);
+        for (int i = 0; i < solutionNodes.size(); i++)
         {
-            System.out.println(optSolutionNodes.get(i).nodeNum);
+            System.out.println(solutionNodes.get(i).nodeNum);
         }
         System.out.println(-1);
     }

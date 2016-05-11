@@ -1,4 +1,7 @@
-//talamas claims cpp sa
+//TSP Simulate Annealing implementation
+//Author: David Talamas
+//CS345 assignment 6
+//May 10, 2016
 
 #include <iostream>
 #include <vector>
@@ -10,11 +13,13 @@
 
 using namespace std;
 
+//Graph represented as a vector of points (x,y)
 class Graph{
 public: 
   vector<pair<int, int> > nodes;
 };
 
+//Get euclidian distance between two points
 double dist(pair<int, int> a, pair<int, int> b){
   double xd = a.first - b.first;
   double yd = a.second - b.second;
@@ -30,20 +35,28 @@ double pathCost(vector<pair<int, int> > &nodes, vector<int> &path){
   return cost;    
 }
 
+//Prints tour
+void printTour(vector<int> &tour){
+  cout<<"Tour:\n";
+  for (vector<int>::iterator it = tour.begin(); it != tour.end(); ++it){
+    cout<<*it<<"\n";
+  }
+  return;
+}
+
+//Gets randomly a neighboring state
 vector<int> nextState(vector<int> s){
   vector<int> newState = s;
   int a,b;
-
-    a = rand() % s.size();
-    b = rand() % s.size();
-
-  //cout<<a<<" "<<b<<"\n";
+  a = rand() % s.size();
+  b = rand() % s.size();
   int temp = newState[a];
   newState[a] = newState[b];
   newState[b] = temp;
   return newState;
 }
 
+//returns true with probability P = exp(-(cost2-cost1)/T);
 bool flipCoin(double cost1, double cost2, double T){
   double p = exp(-(cost2-cost1)/T);
   double u = ((double) rand() / (RAND_MAX));
@@ -55,9 +68,13 @@ bool flipCoin(double cost1, double cost2, double T){
   }
 }
 
-
 int main(int argc, char* argv[]){
   srand(time(NULL));
+  if (argc != 2){
+    cout<<"Wrong args";
+    return 0;
+  }
+  //Get the data from the given file
   char *path = argv[1];
   ifstream f; 
   f.open(path, ios::in);
@@ -65,7 +82,6 @@ int main(int argc, char* argv[]){
   int size = 0;
   if (f.is_open()){
     string line;
-
     while (getline(f, line)){
       if (line.length()> 9 && line.substr(0,9).compare("DIMENSION")==0){
 	size = atoi(line.substr(11,line.length()-11).c_str());
@@ -85,7 +101,7 @@ int main(int argc, char* argv[]){
   }
   f.close();
 
-  //Choose initial tour
+  //Choose initial tour randomly
   vector<int> tour(size, 0);
   int nums[280] = {0};
   for (int i = 1; i <= size; i++){    
@@ -100,15 +116,15 @@ int main(int argc, char* argv[]){
     }
   }
 
+  
   double min = pathCost(g.nodes, tour);
   vector<int> minTour = tour;
-
-  double T = 100; //<--- TODO
+  double T = 100; 
   
-  int count = 0;
+  //Simulated annealing
   while (T > .0001){
-    for (int q = 0; q <300; q++){
-      //  cout<<T<<" "<<min<<"\n";
+    //Iterate 100 times for each temperature
+    for (int q = 0; q <100; q++){
       vector<int> s_ = nextState(tour);
       double prevCost = pathCost(g.nodes, tour);
       double newCost = pathCost(g.nodes, s_);
@@ -121,19 +137,14 @@ int main(int argc, char* argv[]){
       } 
       else if (flipCoin(prevCost, newCost, T)) {
 	tour = s_;
-	//		cout<<".";
-      }
-      else {
-	//  cout<<"+";
       }
     }
-
-
     T *= .9999;
   }
 
-
-  cout<<pathCost(g.nodes, minTour)<<"  \n";
+  //Print results
+  cout<<"Cost: "<<pathCost(g.nodes, minTour)<<" \n";
+  printTour(tour);
   return 0;
   
 
