@@ -2,8 +2,8 @@ Mike Feilbach
 mfeilbach@utexas.edu
 
 
-To run:
+(1) To run:
 
-$ python TSP-simulated-annealing.py filePath
+$ make
 
-where filePath is the path to the a280.tsp file.
+(2) To change the path of the TSP data file: change the path in the Makefile.
