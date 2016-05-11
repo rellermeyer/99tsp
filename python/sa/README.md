@@ -4,6 +4,6 @@ mfeilbach@utexas.edu
 
 To run:
 
-$ python TSP-simulated-annealing.py <filePath>
+$ python TSP-simulated-annealing.py filePath
 
-where <filePath> is the path to the a280.tsp file.
+where filePath is the path to the a280.tsp file.
