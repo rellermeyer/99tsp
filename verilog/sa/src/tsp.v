@@ -404,7 +404,8 @@ always @(*) begin
 	end
 	STATE_COMPUTED_TOTDIST: begin
 		state_d = STATE_DELAY;
-		temperature_d = 64'h3F1A36E2EB1C432D; // 1/10000 in double
+		//temperature_d = 64'h3F1A36E2EB1C432D; // 1/10000 in double
+		temperature_d = 32'h38d1b717; // 1/10000 in single
 		delay_ctr_d = 50;
 		nextstate_d = STATE_LOADING_CITY_1;
 	end
@@ -448,8 +449,8 @@ always @(*) begin
 		// Load these into the distance computer.
 		// We have 4 distances to compute: 1-2, 3-4, and 1-3, 2-4 (2-3 equals 3-2, so we don't need to know it)
 		pipe_tx_ctr_d = 4;
-		pipe_tx_buf_a_d = {city1_q, city3_q, city1_q, city2_q};
-		pipe_tx_buf_b_d = {city2_q, city4_q, city3_q, city4_q};
+		pipe_tx_buf_a_d = {city1_q, douta, city1_q, city2_q};
+		pipe_tx_buf_b_d = {city2_q, doutb, douta, doutb};
 		pipe_rx_ctr_d = 4;
 		pipe_rx_buf_d = 0;
 		state_d = STATE_PIPING_DISTANCES;
@@ -479,7 +480,7 @@ always @(*) begin
 				state_d = STATE_LOADING_CITY_1; // Repeat
 
 				// Update best_distance
-				total_dist_d = total_dist_q + pipe_rx_buf_q[63:32]+pipe_rx_buf_q[31:0] - pipe_rx_buf_q[127:96]+pipe_rx_buf_q[95:64];
+				total_dist_d = total_dist_q + pipe_rx_buf_q[63:32]+pipe_rx_buf_q[31:0] - (pipe_rx_buf_q[127:96]+pipe_rx_buf_q[95:64]);
 			end else begin
 				// We have to compute e^(-(new-old)/T)
 				// We don't have to add best_distance to each of these, because they're eventually subtracted from each other

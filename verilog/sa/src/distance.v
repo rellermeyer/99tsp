@@ -30,7 +30,7 @@ module distance(
 
 reg sqrt_inp_valid_q, sqrt_inp_valid_d;
 reg [31:0] sqrt_inp_q, sqrt_inp_d;
-wire [12:0] sqrt_out;
+wire [15:0] sqrt_out;
 wire sqrt_out_valid;
 cordic_sqrt sqrt (
   .aclk(clk),
