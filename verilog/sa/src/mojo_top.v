@@ -116,7 +116,7 @@ always @(*) begin
 	if (best_distance_valid || cntdown_q == 0) begin
 		printval_d = best_distance;
 		digit_cnt_d = 8;
-		tx_data_d = "\n";
+		tx_data_d = "\r";
 		tx_new_data_d = 1;
 		cntdown_d = 100000000;
 	end
@@ -137,8 +137,7 @@ always @(posedge clk) begin
 	end
 end
 
-assign led = best_distance[7:0];//exp_debug;//floatval[7:0];//rng_out[7:0];//{tx_busy, printval_q[6:0]};
-//assign led = exp_res[7:0];
+assign led = best_distance[15:8];
 
 // these signals should be high-z when not used
 assign spi_miso = 1'bz;

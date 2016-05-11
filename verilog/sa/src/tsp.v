@@ -121,13 +121,8 @@ reg [PRECISION*2-1:0] city1_q, city1_d, city2_q, city2_d, city3_q, city3_d, city
 `define X(v) (v[PRECISION-1:0])
 `define Y(v) (v[PRECISION*2-1:PRECISION])
 
-assign debug = {2'b0, total_dist_q[5:0]};//total_dist_q[7:0];//string_len_q;//{state_q[2:0], has_read_prolog_q, nextstate_q[2:0], 1'b0};//nnodes_in_file_q[7:0];//((read_string_q>>((string_len_q-1)*8))&8'hFF);//{string_len_q[3:0],nnodes_in_file_q[3:0]};
+assign debug = nnodes_in_file_q[7:0];
 
-//reg [PRECISION-1:0] dx_q, dx_d, dy_q, dy_d;
-//wire [PRECISION-1:0] dx, dy, dist_squared;
-//assign dx = `X(doutb)-`X(douta);
-//assign dy = `Y(doutb)-`Y(douta);
-//assign dist_squared = dx*dx + dy*dy;
 reg [2:0] pipe_tx_ctr_q, pipe_tx_ctr_d, pipe_rx_ctr_q, pipe_rx_ctr_d;
 reg [PRECISION*4*2-1:0] pipe_tx_buf_a_q, pipe_tx_buf_a_d, pipe_tx_buf_b_q, pipe_tx_buf_b_d;
 reg [PRECISION*4-1:0] pipe_rx_buf_q, pipe_rx_buf_d;
