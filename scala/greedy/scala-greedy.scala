@@ -1,6 +1,6 @@
 /*
  * Gilad Oved
- * May 4th 2016
+ * May 11th 2016
  * CS 345
  */
 
@@ -10,6 +10,11 @@ import java.io.{ FileReader, FileNotFoundException, IOException, File, PrintWrit
 
 object tspgreedy {
 
+  class Path(np: ArrayBuffer[TSPNode], d: Double) {
+    var nodePath = np
+    var distance = d
+  }
+  
   object TSPObject {
     var map = Map[String, String]()
     var data = ArrayBuffer[TSPNode]()
@@ -21,27 +26,45 @@ object tspgreedy {
     def addMap(a: String, b: String) {
       map(a) = b
     }
+    
+    def getBestPath: Path ={
+      var bestPath = new Path(null, Integer.MAX_VALUE)
+      var bestDistance = Double.MaxValue
+      
+      var i = 0;
+      for(i <- 1 to data.length-1) {
+        var nextPath = getPath(i)
+        if (nextPath.distance < bestDistance) {
+          bestPath = nextPath
+          bestDistance = nextPath.distance
+        }
+      }
+            
+      bestPath
+    }
 
-    def getPath: ArrayBuffer[TSPNode] = {
-      var path = ArrayBuffer[TSPNode]()
+    def getPath(start: Int): Path = {
+      var nodePath = ArrayBuffer[TSPNode]()
       var explore = Set[TSPNode]()
+      var distance = 0.0
       TSPObject.data.foreach { node =>
         explore.add(node)
       }
-      var prevNode = TSPObject.data(0)
+      var prevNode = TSPObject.data(start)
       explore.remove(prevNode)
-      path += prevNode
+      nodePath += prevNode
       while (!explore.isEmpty) {
         var nextCity = findNearest(prevNode, explore)
-        path += nextCity
+        distance += prevNode.distanceTo(nextCity)
+        nodePath += nextCity
         explore.remove(nextCity)
         prevNode = nextCity
       }
-      path
+      new Path(nodePath, distance)
     }
 
     private def findNearest(from: TSPNode, options: Set[TSPNode]): TSPNode = {
-      var bestDistance = Integer.MAX_VALUE
+      var bestDistance = Double.MaxValue
       var bestNode: TSPNode = from
       options.toList.foreach { node =>
         val dist = from.distanceTo(node)
@@ -68,13 +91,8 @@ object tspgreedy {
     var y: Int = b
 
     //Euclidean distance
-    def distanceTo(to: TSPNode): Int = {
-      val deltaX = x - to.x
-      val deltaY = y - to.y
-      val squaredX = deltaX * deltaX
-      val squaredY = deltaY * deltaY
-      val doubleResult = Math.sqrt(squaredX + squaredY) + 0.5
-      doubleResult.toInt
+    def distanceTo(to: TSPNode): Double = {
+      Math.sqrt(((x-to.x) * (x-to.x)) + ((y-to.y) * (y-to.y)))
     }
 
     override def toString(): String = index + ": (" + x + ", " + y + ")";
@@ -118,15 +136,15 @@ object tspgreedy {
       case ex: FileNotFoundException => println("Couldn't find that file.")
       case ex: IOException           => println("Had an IOException trying to read that file")
     }
-
+    
     //Write an output file with the resulting path
-    val path = TSPObject.getPath
+    val path = TSPObject.getBestPath
     val writer = new PrintWriter(new File("a280tsp-greedy-output.tsp"))
     writer.write("NAME : a280tsp-greedy-output.tsp\n")
     writer.write("TYPE : TOUR\n")
-    writer.write("DIMENSION : " + path.length + "\n")
+    writer.write("DIMENSION : " + path.nodePath.length + "\n")
     writer.write("TOUR_SECTION\n")
-    path.foreach { node => writer.write(node.index + "\n") }  
+    path.nodePath.foreach { node => writer.write(node.index + "\n") }  
     writer.write("-1")
     writer.close()
   }
