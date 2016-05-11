@@ -86,8 +86,7 @@ public class TSP
     }
 
     public static void solve(ArrayList<Node> nodeList)
-    {
-        double minTotalDistance = Double.MAX_VALUE; 
+    { 
         //copy the list of nodes
         ArrayList<Node> nodes = new ArrayList<Node>(nodeList);
         double totalDistance = 0;
