@@ -1,5 +1,5 @@
 2-opt algorithm for approximating a solution to TSP, written in Python.
-Takes about 1 minute to run for a280.tsp input, resulting in a distance of 2741.804.
+Takes about 1 minute to run for a280.tsp.
 
 To run:
 	make run
