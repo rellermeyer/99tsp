@@ -203,44 +203,16 @@ class gen:
 		return childtour
 
 def distance(posa, posb):
-	return ((posb[1] - posa[1]) ** 2 + (posb[0] - posa[0]) ** 2) ** 0.5
+	return ( (posb[1] - posa[1]) ** 2 + (posb[0] - posa[0]) ** 2 ) ** 0.5
 
 def main():
-
-	places = [0,1,2]
-	
-	
-	a = vertex(0)
-	b = vertex(1)
-	c = vertex(2)
-	
-	
-	a.addEdge(b,2)
-	a.addEdge(c,5)
-	b.addEdge(c,10)
-	
-	cities = [a,b,c]
-	
-	mypop = pop(4, True, cities)
-	best =  mypop.max_fit()
-	
-	#  mutation rate, popsize, tourneysize, eliteflag, cities
-	ga = gen(.10, 100, 5, False, cities)
-	
-	ga.evolve()
-	
-	macks =  ga.pool.max_fit()
-	# print macks[0].tostr(),macks[1], macks[0].getdist()
-
-	# 
-	# 
-	# 
 	
 	path =  sys.argv[1]
 	
-	with gzip.open(path,'rb') as f:
-		file = f.readlines()
+	# with gzip.open(path,'rb') as f:
+	# 	file = f.readlines()
 	
+	file = open(path, 'r')
 	
 	counter = 0
 	curr_cities = []
@@ -259,14 +231,23 @@ def main():
 		curr_cities.append(city)
 		counter += 1
 		
-		
+
+	r = int(sys.argv[2])
+	p = int(sys.argv[3])
+	
+	
 	#  mutation rate, popsize, tourneysize, eliteflag, cities
-	ga = gen(.10, 100, 25, True, curr_cities)
+	mr = float(sys.argv[4])
+	ps = int(sys.argv[5])
+	ts = int(sys.argv[6])
 	
 	
-	for i in range(1000):
+	ga = gen(mr, ps, ts, True, curr_cities)
+	
+	
+	for i in range(r):
 		ga.evolve()
-		if i % 250 == 1:
+		if i % p == 0:
 			print "Best route at Generation", i
 			macks =  ga.pool.max_fit()	
 			print macks[0].tostr(),macks[1], macks[0].getdist()
