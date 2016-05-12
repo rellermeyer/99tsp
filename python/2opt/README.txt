@@ -1,14 +1,13 @@
-2opt algorithm for approximating a solution to TSP, written in Python.
-Takes about 1 minute to run for a280.tsp input with a distance of 2741.804.
+2-opt algorithm for approximating a solution to TSP, written in Python.
+Takes about 1 minute to run for a280.tsp input, resulting in a distance of 2741.804.
 
-Resulting tour will differ depending on the order of edges evaluted and switched or in this case, which node starts the list of nodes represented an input tour.
-
-To run with default input:
+To run:
 	make run
 
-To run with default input and randomized start node of the node list:
+The resulting tour will differ depending on which node starts the list of nodes representing the input tour.
+
+To run with randomized start node:
 	make run_random
 
-Input file is set to a280.tsp by default.
-To change this, change TEST_FILE in Makefile to desired input file.
+Set TEST_FILE in Makefile to change the input file (currently a280.tsp).
 Input files must have '.tsp' extension.

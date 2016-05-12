@@ -95,7 +95,7 @@ def parse_input_route(filename):
 def get_coords(line):
 	"""
 	returns the line data as floats, None if line contains more than 
-			3 items or non-numerics in the line
+	3 items or non-numerics in the line
 	line - string containing the data
 	"""
 	data = line.split()
@@ -148,7 +148,7 @@ def run_2opt(route):
 	improvement = True
 	best_route = route
 	best_distance = route_distance(route)
-	while improvement:  #check loop ranges
+	while improvement: 
 		improvement = False
 		for i in range(len(best_route) - 1):
 			for k in range(i+1, len(best_route)):
@@ -170,6 +170,7 @@ def print_results(route, filename, time, startnode):
 	route - route to print
 	filename - name of the original input filename
 	time - time to run 2opt
+	startnode - start node of original tour if randomized
 	"""
 	for node in route:
 		print(node)
