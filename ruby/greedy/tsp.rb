@@ -61,8 +61,9 @@ def main()
     total += Math.sqrt(dist(u, v))
   end
 
-  puts solution.length
+  puts "Path: "
   puts solution
+  puts "Path Cost: "
   puts total
 end
 
