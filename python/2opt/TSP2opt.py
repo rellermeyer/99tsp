@@ -43,8 +43,7 @@ class Node:
 
 def parse_input_route(filename):
 	"""
-	returns initial route as read from input file,
-	        None if parsing errors occur
+	returns initial route as read from input file, None if parsing errors occur
 	filename - name of the input file with '.tsp' extension
 	"""
 	f = open(filename, 'r')
@@ -94,8 +93,8 @@ def parse_input_route(filename):
 
 def get_coords(line):
 	"""
-	returns the line data as floats, None if line contains more than 
-	3 items or non-numerics in the line
+	returns the line data as numerals, None if line contains more than 
+		3 items or non-numerics in the line
 	line - string containing the data
 	"""
 	data = line.split()
@@ -122,10 +121,10 @@ def route_distance(route):
 
 def swap_2opt(route, i, k):
 	"""
-	swaps the endpoints of two edges to eliminated potential edge crossover 
-	by creating a path where a portion of the nodes are reversed
-	returns the new route created with a the 2opt swap
-	route - route to apply 2opt
+	swaps the endpoints of two edges by reversing a section of nodes, 
+		ideally to eliminate crossovers
+	returns the new route created with a the 2-opt swap
+	route - route to apply 2-opt
 	i - start index of the portion of the route to be reversed
 	k - index of last node in portion of route to be reversed
 	pre: 0 <= i < (len(route) - 1) and i < k < len(route)
@@ -141,7 +140,9 @@ def swap_2opt(route, i, k):
 
 def run_2opt(route):
 	"""
-	improves an existing route using the 2opt swap until no improved route is found
+	improves an existing route using the 2-opt swap until no improved route is found
+	best path found will differ depending of the start node of the list of nodes
+		representing the input tour
 	returns the best path found
 	route - route to improve
 	"""
@@ -166,7 +167,7 @@ def run_2opt(route):
 
 def print_results(route, filename, time, startnode):
 	"""
-	prints the node numbers of the route and route information after
+	prints the nodes in the final route and route information
 	route - route to print
 	filename - name of the original input filename
 	time - time to run 2opt
