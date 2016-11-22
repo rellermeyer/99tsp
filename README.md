@@ -1,17 +1,67 @@
 # The 99 Traveling Salespeople Project
 
-TODO: add a description
-
-## Languages
-
-_TODO: list of available languages_
+The 99 Traveling Salespeople project is a project that aims to collect
+implementations of the Traveling Salesman from different programming
+languages that exist, practical or esoteric. The purpose of the collection is
+to illustrate the many differences among programming languages when implementing
+the same algorithm, in this case, the traveling salesman.
 
 ## Algorithms
+
+The following variations of the Traveling Salesman problem are currently 
+available in this repository.
 
 * Greedy (greedy)
 * Linear Programming (lp)
 * Simulated Annealing (sa)
 * Genetic (gen)
 * Neural Network (neural)
+* 2-Opt (2opt)
 
-_TODO: extend the list of used algorithms_
+If more implementations are added, this list will be added to as well.
+
+Last update: November 21, 2016
+
+
+## Languages
+
+The following languages and implementations are currently available on the
+repository.
+
+* R
+    * Greedy
+* C
+    * Greedy
+    * Simulated Annealing
+* C++
+    * Greedy
+    * Simulated Annealing
+    * Genetic
+* Java
+    * Greedy
+    * Simulated Annealing
+    * Genetic
+* Javascript
+    * Greedy
+* Objective C
+    * Greedy
+* Prolog
+    * Simulated Annealing
+* Python
+    * Greedy
+    * Genetic
+    * Simulated Annealing
+    * 2-Opt
+* Ruby
+    * Greedy
+* Rust
+    * 2-Opt
+* Scala
+    * Greedy
+    * Genetic
+* Verilog
+    * Simulated Annealing
+* Visual Basic
+    * Greedy
+
+Last update: November 21, 2016
