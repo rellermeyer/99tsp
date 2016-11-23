@@ -36,11 +36,8 @@ repository.
 * C++
     * Greedy
     * Simulated Annealing
-    * Genetic
 * Java
     * Greedy
-    * Simulated Annealing
-    * Genetic
 * Javascript
     * Greedy
 * Objective C
@@ -64,4 +61,4 @@ repository.
 * Visual Basic
     * Greedy
 
-Last update: November 21, 2016
+Last update: November 22, 2016
