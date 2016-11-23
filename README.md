@@ -27,15 +27,62 @@ The following variations of the Traveling Salesman problem are currently
 available in this repository.
 
 * Greedy (greedy)
-* Linear Programming (lp)
+* ~~Linear Programming (lp)~~ (no one has done 1 yet)
 * Simulated Annealing (sa)
 * Genetic (gen)
 * ~~Neural Network (neural)~~ (no one has done 1 yet)
 * 2-Opt (2opt)
 
 If more implementations are added, this list will be added to as well.
+Below are short descriptions of each implementation method. Note that the 
+implementations contained in this repository may differ from these 
+descriptions.
 
-Last update: November 23, 2016
+### Greedy
+
+A greedy solution, in general, is one that picks the "best" choice at every
+step in program execution in hope that it will produce the best (or a good)
+result at the end of execution.
+
+A greedy implementation will simply grab the nearest neighbor from the current
+city at every step until all cities have been visited. The last city
+on the tour is the starting city, so the last step isn't necessarily
+greedy.
+
+### Linear Programming
+
+TODO
+
+### Simulated Annealing
+
+Simulated annealing will do "hill climbing" in that it will randomly make
+changes to the tour and accept the change if the change results in a better
+solution. If the change doesn't result in a better solution, then there
+is still a possibility that the change will be accepted for the next step.
+The probability of it being accepted is controlled by the current 
+"temperature": the higher it is, the more of a chance it has to accept a
+"bad" change. Bad changes are accepted as they might let the program
+escape local optima in search of a global optima. The temperature of
+the program decreases as time passes, and when it reaches a specified
+point, execution stops and the solution is returned.
+
+In terms of the traveling salesman, the random change would be to swap
+cities of an already existing tour in hope that it will produce
+a better tour.
+
+### Genetic
+
+TODO
+
+### Neural Network
+
+TODO
+
+### 2-Opt
+
+TODO
+
+Last update: November 22, 2016
 
 ## Languages
 
