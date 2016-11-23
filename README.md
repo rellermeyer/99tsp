@@ -101,6 +101,10 @@ http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-
 
 ### Neural Network
 
+Neural networks take some input and, depending on the weights on the edges of 
+the network and other things one might add to it, an output is produced that
+usually corresponds to some desired result.
+
 TODO
 
 ### 2-Opt
