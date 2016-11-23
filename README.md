@@ -6,6 +6,21 @@ languages that exist, practical or esoteric. The purpose of the collection is
 to illustrate the many differences among programming languages when implementing
 the same algorithm, in this case, the traveling salesman.
 
+## What is the Traveling Salesman Problem?
+
+(adapted from Wikipedia)
+
+You have a bunch of cities and a list of distances between the cities (if
+a path between the 2 exists). The task is to find a route that will
+do the following:
+
+* Visit every city exactly once
+* Returns to the city you started from
+* Returns the shortest possible route
+
+The problem is NP-hard, basically meaning there isn't a polynomial time 
+algorithm currently known that can produce a correct answer.
+
 ## Algorithms
 
 The following variations of the Traveling Salesman problem are currently 
@@ -20,8 +35,7 @@ available in this repository.
 
 If more implementations are added, this list will be added to as well.
 
-Last update: November 22, 2016
-
+Last update: November 23, 2016
 
 ## Languages
 
