@@ -72,7 +72,18 @@ a better tour.
 
 ### Genetic
 
-TODO
+A genetic algorithm has the concepts of a population with traits that can be
+"mutated" and/or "bred/crossover'd" in order to produce a new population.
+The members of a population are the solutions to the problem one is trying
+to solve. By selectively mutating and crossing over members with strong
+"fitness" (i.e. a good solution), the hope is to create populations
+that progressively get better and better until a good solution is
+found. In general, the more generations one has an algorithm run for, the 
+better the results will be.
+
+For the traveling salesman problem, the members of the populations would
+be tours, and one could do mutation/crossing over of good tours to produce
+new (and potentially better) tours as generations pass.
 
 ### Neural Network
 
