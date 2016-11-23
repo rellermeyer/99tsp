@@ -1,20 +1,23 @@
 /*Brandon Post (bkp472)
 May, 2016
-CS 345 - Rellermeyer */
+CS 345 - Rellermeyer 
+
+Fixed/edited by Loc Hoang
+*/
 
 
 #include<stdio.h>
 #include<float.h>
 #include<math.h>
 
-struct Node { //nodes for the final graph
+struct Node { // nodes for the final graph
 	int x;
 	int y;
 	int nodeId;
 };
-struct Element { //elements for linked list
-	struct Node * node;
-	struct Element * next;
+struct Element { // elements for linked list
+	struct Node *node;
+	struct Element *next;
 };
 
 double distance(int x1, int y1, int x2, int y2){
@@ -22,26 +25,24 @@ double distance(int x1, int y1, int x2, int y2){
 }
 
 printList(struct Element * list){
-		while(list != NULL){
+	while(list != NULL){
 		printf("id is: %d x is: %d y is: %d\n", list->node->nodeId, list->node->x, list->node->y);
 		list = list->next;
 	}
 }
-struct Element * parseFile(char * file){
+struct Element* parseFile(char *file){
 	FILE *filepointer;
-	char buf[255]; //lines for use in loop
-	char loc[255]; //file location
-	struct Element * prevElement = NULL;
-	struct Element * currElement;
+	char buf[255]; // lines for use in loop
+	char loc[255]; // file location
+	struct Element *prevElement = NULL;
+	struct Element *currElement;
 	int id = 0;
 	int x = 0;
 	int y = 0;
 
-
-
-	strcpy(loc, "TSPdata/");
+	//strcpy(loc, "TSPdata/");
 	strcat(loc, file);
-	strcat(loc, ".tsp");
+	//strcat(loc, ".tsp");
 
 	printf("\n");
 
@@ -114,9 +115,9 @@ main(int argx, char **argv)
 	//argv[0] should contain program name
 	//argv[1] should be first arg, should be input file.
 	//!!!!! Perhaps implement multiple file names? 
-	struct Element * list;
+	struct Element *list;
 	double solution = 0.0;
-	if(argv[1] == NULL){ //check for input file
+	if(argv[1] == NULL){ // check for input file
 		printf("99 TSP - No input file\n");
 		exit(1);
 	}
