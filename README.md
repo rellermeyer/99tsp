@@ -15,12 +15,12 @@ available in this repository.
 * Linear Programming (lp)
 * Simulated Annealing (sa)
 * Genetic (gen)
-* Neural Network (neural)
+* ~~Neural Network (neural)~~ (no one has done 1 yet)
 * 2-Opt (2opt)
 
 If more implementations are added, this list will be added to as well.
 
-Last update: November 21, 2016
+Last update: November 22, 2016
 
 
 ## Languages
