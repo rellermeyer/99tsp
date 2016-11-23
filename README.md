@@ -51,7 +51,15 @@ greedy.
 
 ### Linear Programming
 
-TODO
+The technique of linear programming to solve problems involves constructing
+linear equations that represent constraints on a problem and attempting to 
+find the best answer possible under these constraints.
+
+There exist a set of requirements that can be constructed for the traveling
+salesman problem that will result in an answer.
+
+See Wikipedia for more information:
+https://en.wikipedia.org/wiki/Travelling_salesman_problem#Integer_linear_programming_formulation
 
 ### Simulated Annealing
 
@@ -70,6 +78,9 @@ In terms of the traveling salesman, the random change would be to swap
 cities of an already existing tour in hope that it will produce
 a better tour.
 
+Good source:
+http://www.theprojectspot.com/tutorial-post/simulated-annealing-algorithm-for-beginners/6
+
 ### Genetic
 
 A genetic algorithm has the concepts of a population with traits that can be
@@ -85,13 +96,25 @@ For the traveling salesman problem, the members of the populations would
 be tours, and one could do mutation/crossing over of good tours to produce
 new (and potentially better) tours as generations pass.
 
+Good Source:
+http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-travelling-salesman-problem/5
+
 ### Neural Network
 
 TODO
 
 ### 2-Opt
 
-TODO
+According to Wikipedia, 2-Opt was created specifically for the traveling 
+salesman problem. The idea is to rearrange your path so that there is no
+"crossover", and this is done by reversing particular sections of your
+tour. This continues until you do not get a better path.
+
+A complete 2-opt search will try all possible swaps for a particular tour,
+so the algorithm can potentially be extremely inefficient.
+
+More details can be found here:
+https://en.wikipedia.org/wiki/2-opt
 
 Last update: November 22, 2016
 
