@@ -78,7 +78,7 @@ In terms of the traveling salesman, the random change would be to swap
 cities of an already existing tour in hope that it will produce
 a better tour.
 
-Good source:
+Good Source (Please do not copy the Java source):
 http://www.theprojectspot.com/tutorial-post/simulated-annealing-algorithm-for-beginners/6
 
 ### Genetic
@@ -96,7 +96,7 @@ For the traveling salesman problem, the members of the populations would
 be tours, and one could do mutation/crossing over of good tours to produce
 new (and potentially better) tours as generations pass.
 
-Good Source:
+Good Source (Please do not copy the Java source):
 http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-travelling-salesman-problem/5
 
 ### Neural Network
