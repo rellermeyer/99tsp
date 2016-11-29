@@ -120,7 +120,7 @@ so the algorithm can potentially be extremely inefficient.
 More details can be found here:
 https://en.wikipedia.org/wiki/2-opt
 
-Last update: November 22, 2016
+Last update: November 28, 2016
 
 ## Languages
 
