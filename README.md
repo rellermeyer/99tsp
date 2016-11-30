@@ -137,6 +137,7 @@ repository.
     * Simulated Annealing
 * Java
     * Greedy
+    * Dynamic Programming
 * Javascript
     * Greedy
 * Objective C
