@@ -160,5 +160,7 @@ repository.
     * Simulated Annealing
 * Visual Basic
     * Greedy
+* Matlab
+    * Greedy
 
 Last update: November 22, 2016
