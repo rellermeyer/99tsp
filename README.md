@@ -137,6 +137,7 @@ repository.
     * Simulated Annealing
 * Java
     * Greedy
+    * Dynamic Programming
 * Javascript
     * Greedy
 * Objective C
@@ -151,6 +152,7 @@ repository.
 * Ruby
     * Greedy
 * Rust
+    * Greedy
     * 2-Opt
 * Scala
     * Greedy
@@ -158,6 +160,8 @@ repository.
 * Verilog
     * Simulated Annealing
 * Visual Basic
+    * Greedy
+* Matlab
     * Greedy
 
 Last update: November 22, 2016
