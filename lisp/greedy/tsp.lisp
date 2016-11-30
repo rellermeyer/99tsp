@@ -1,5 +1,5 @@
 ; Terminal Command
-; clisp -q -q -on-error abort -x '(progn (load "tsp.lisp") (tsp-solve "input.txt") (quit))'
+; clisp -q -q -on-error abort -x '(progn (load "tsp.lisp") (tsp-solve "a280.tsp") (quit))'
 
 (defun tsp-solve (input-file)
 	(let ((in (open input-file :if-does-not-exist nil)))
@@ -12,6 +12,7 @@
 					while line
 					collect (string-to-list line)) )
 			(close in)))
+	(setq data (remove '(EOF) data :test #'equal))
 	(setq solution (list (nth 0 start)))
 	(setq length 0)
 	(setq current start)
