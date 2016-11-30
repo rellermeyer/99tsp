@@ -152,6 +152,7 @@ repository.
 * Ruby
     * Greedy
 * Rust
+    * Greedy
     * 2-Opt
 * Scala
     * Greedy
