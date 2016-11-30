@@ -163,5 +163,7 @@ repository.
     * Greedy
 * Matlab
     * Greedy
+* Lisp
+    * Greedy
 
 Last update: November 22, 2016
