@@ -127,6 +127,8 @@ Last update: November 28, 2016
 The following languages and implementations are currently available on the
 repository.
 
+Bolded languages are pending implementation/examination (Fall 2016).
+
 * R
     * Greedy
 * C
@@ -134,12 +136,30 @@ repository.
     * Simulated Annealing
 * C++
     * Greedy
+    * **Genetic**
     * Simulated Annealing
+    * **2-Opt**
+* Groovy
+    * **Greedy**
+* Go
+    * **Greedy**
+    * **Simulated Annealing**
+* Haskell
+    * **Greedy**
 * Java
     * Greedy
-    * Dynamic Programming
+    * **Simulated Annealing**
+    * **Dynamic Programming**
+    * **2-Opt**
 * Javascript
     * Greedy
+    * **Genetic**
+* Kotlin
+    * **Greedy**
+* Lisp
+    * **Greedy**
+* Matlab
+    * **Greedy**
 * Objective C
     * Greedy
 * Prolog
@@ -148,22 +168,22 @@ repository.
     * Greedy
     * Genetic
     * Simulated Annealing
+    * **Neural Network**
     * 2-Opt
 * Ruby
     * Greedy
 * Rust
-    * Greedy
+    * **Greedy**
     * 2-Opt
 * Scala
     * Greedy
     * Genetic
+* Swift
+    * **Greedy**
+    * **Genetic**
 * Verilog
     * Simulated Annealing
 * Visual Basic
     * Greedy
-* Matlab
-    * Greedy
-* Lisp
-    * Greedy
 
-Last update: November 22, 2016
+Last update: November 30, 2016
