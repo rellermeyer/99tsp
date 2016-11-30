@@ -32,6 +32,7 @@ available in this repository.
 * Genetic (gen)
 * ~~Neural Network (neural)~~ (no one has done 1 yet)
 * 2-Opt (2opt)
+* ~~Dynamic Programming~~ (pending implementations)
 
 If more implementations are added, this list will be added to as well.
 Below are short descriptions of each implementation method. Note that the 
@@ -120,7 +121,11 @@ so the algorithm can potentially be extremely inefficient.
 More details can be found here:
 https://en.wikipedia.org/wiki/2-opt
 
-Last update: November 28, 2016
+### Dynamic Programming
+
+TODO
+
+Last update: November 30, 2016
 
 ## Languages
 
