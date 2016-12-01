@@ -32,6 +32,7 @@ available in this repository.
 * Genetic (gen)
 * ~~Neural Network (neural)~~ (no one has done 1 yet)
 * 2-Opt (2opt)
+* ~~Dynamic Programming~~ (pending implementations)
 
 If more implementations are added, this list will be added to as well.
 Below are short descriptions of each implementation method. Note that the 
@@ -120,12 +121,18 @@ so the algorithm can potentially be extremely inefficient.
 More details can be found here:
 https://en.wikipedia.org/wiki/2-opt
 
-Last update: November 28, 2016
+### Dynamic Programming
+
+TODO
+
+Last update: November 30, 2016
 
 ## Languages
 
 The following languages and implementations are currently available on the
 repository.
+
+Bolded languages are pending implementation/examination (Fall 2016).
 
 * R
     * Greedy
@@ -134,11 +141,30 @@ repository.
     * Simulated Annealing
 * C++
     * Greedy
+    * **Genetic**
     * Simulated Annealing
+    * **2-Opt**
+* Groovy
+    * **Greedy**
+* Go
+    * **Greedy**
+    * **Simulated Annealing**
+* Haskell
+    * **Greedy**
 * Java
     * Greedy
+    * **Simulated Annealing**
+    * **Dynamic Programming**
+    * **2-Opt**
 * Javascript
     * Greedy
+    * **Genetic**
+* Kotlin
+    * **Greedy**
+* Lisp
+    * **Greedy**
+* Matlab
+    * **Greedy**
 * Objective C
     * Greedy
 * Prolog
@@ -147,17 +173,22 @@ repository.
     * Greedy
     * Genetic
     * Simulated Annealing
+    * **Neural Network**
     * 2-Opt
 * Ruby
     * Greedy
 * Rust
+    * **Greedy**
     * 2-Opt
 * Scala
     * Greedy
     * Genetic
+* Swift
+    * **Greedy**
+    * **Genetic**
 * Verilog
     * Simulated Annealing
 * Visual Basic
     * Greedy
 
-Last update: November 22, 2016
+Last update: November 30, 2016
