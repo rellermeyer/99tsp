@@ -145,7 +145,13 @@ struct Population {
 
 }
 
-let backgroundQueue = DispatchQueue.global(qos: .background)
+let backgroundQueue: DispatchQueue!
+if #available(OSX 10.10, *) {
+    backgroundQueue = DispatchQueue.global(qos: .background)
+} else {
+    backgroundQueue = DispatchQueue.global(priority: .default)
+}
+
 let breedSemaphore = DispatchSemaphore(value: 0)
 var breedQueues = [DispatchQueue]()
 for i in 0..<5 {
