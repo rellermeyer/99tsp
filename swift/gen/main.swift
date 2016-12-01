@@ -145,12 +145,19 @@ struct Population {
 
 }
 
+let backgroundQueue = DispatchQueue.global(qos: .background)
+let breedSemaphore = DispatchSemaphore(value: 0)
+var breedQueues = [DispatchQueue]()
+for i in 0..<5 {
+    breedQueues.append(DispatchQueue(label: "Breed Queue \(i)"))
+}
 
 struct Genetic {
     let mutationRate = 0.015
     let tournamentSize = 5
     let elitism = true
 
+    // this should only be called in one place to reduce race condition-related bugs
     func evolve(population: Population) -> Population {
         var newPop = Population(size: population.size, initialize: false)
 
@@ -160,13 +167,23 @@ struct Genetic {
             offset = 1
         }
 
+        // BREED
+        let breedGroup = DispatchGroup()
         for i in offset..<population.size {
-            let parent1 = select(from: population)
-            let parent2 = select(from: population)
-            let child = crossover(parent1: parent1, parent2: parent2)
-            newPop[i] = child
+            breedQueues[i % breedQueues.count].async(group: breedGroup, execute: {
+                let parent1 = self.select(from: population)
+                let parent2 = self.select(from: population)
+                let child = self.crossover(parent1: parent1, parent2: parent2)
+                newPop[i] = child
+            })
         }
 
+        breedGroup.notify(queue: DispatchQueue(label: "Breed Completion"), execute: {
+            breedSemaphore.signal()
+        })
+
+        breedSemaphore.wait()
+        // MUTATE
         for i in offset..<population.size {
             newPop[i] = mutate(tour: newPop[i])
         }
@@ -174,7 +191,6 @@ struct Genetic {
     }
 
     func crossover(parent1: Tour, parent2: Tour) -> Tour {
-        //        print("crossover")
         var child = Tour()
 
         var start = Int(arc4random_uniform(UInt32(parent1.size)))
@@ -194,7 +210,7 @@ struct Genetic {
             }
         }
 
-
+        // this part is very inefficent
         for i in 0..<allCities.count {
             if !child.contains(city: parent2[i]) {
                 for j in 0..<allCities.count {
@@ -205,7 +221,6 @@ struct Genetic {
                 }
             }
         }
-        //        print("end crossover")
         return child
     }
 
@@ -239,6 +254,8 @@ struct Genetic {
 
 }
 
+let programSemaphore = DispatchSemaphore(value: 0)
+
 func parse(file: [String]) {
     var i = 0
     for line in file {
@@ -252,23 +269,27 @@ func parse(file: [String]) {
         i += 1
     }
 
-    let genetic = Genetic()
+    backgroundQueue.async {
+        let genetic = Genetic()
 
-    var pop = Population(size: allCities.count, initialize: true)
-    var tour = pop.getFittest()
-    print("Start: \(tour.getDistance())")
+        var pop = Population(size: allCities.count, initialize: true)
+        var tour = pop.getFittest()
+        print("Start: \(tour.getDistance())")
 
-    for i in 0..<5 {
-        pop = genetic.evolve(population: pop)
-        if i % 1 == 0 {
-            tour = pop.getFittest()
-            print("\(i + 1). \(tour.getDistance())")
+        for i in 0..<50 {
+            pop = genetic.evolve(population: pop)
+            if i % 1 == 0 {
+                tour = pop.getFittest()
+                print("\(i + 1). \(tour.getDistance())")
+            }
         }
+
+        tour = pop.getFittest()
+        print("End: \(tour.getDistance())")
+        programSemaphore.signal()
     }
 
-    tour = pop.getFittest()
-    print("End: \(tour.getDistance())")
-
+    programSemaphore.wait()
 }
 
 
