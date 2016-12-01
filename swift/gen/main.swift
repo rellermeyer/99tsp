@@ -111,11 +111,14 @@ struct Population {
 
 
     init(size: Int, initialize: Bool) {
-        if initialize {
-            for _ in 0..<size {
+
+        for _ in 0..<size {
+            if initialize {
                 var tour = Tour()
                 tour.generateIndividual()
                 tours.append(tour)
+            } else {
+                tours.append(Tour())
             }
         }
     }
@@ -140,11 +143,6 @@ struct Population {
         return fittest
     }
 
-
-    mutating func add(tour: Tour) {
-        tours.append(tour)
-    }
-
 }
 
 
@@ -158,15 +156,15 @@ struct Genetic {
 
         var offset = 0
         if elitism {
-            newPop.add(tour: population.getFittest())
+            newPop[0] = population.getFittest()
             offset = 1
         }
 
-        for _ in offset..<population.size {
+        for i in offset..<population.size {
             let parent1 = select(from: population)
             let parent2 = select(from: population)
             let child = crossover(parent1: parent1, parent2: parent2)
-            newPop.add(tour: child)
+            newPop[i] = child
         }
 
         for i in offset..<population.size {
@@ -176,6 +174,7 @@ struct Genetic {
     }
 
     func crossover(parent1: Tour, parent2: Tour) -> Tour {
+        //        print("crossover")
         var child = Tour()
 
         var start = Int(arc4random_uniform(UInt32(parent1.size)))
@@ -188,12 +187,13 @@ struct Genetic {
         }
 
         var takenSlots = [Int]()
-        for i in 0..<allCities.count {
-            if i > start && i < end {
+        if start < end {
+            for i in (start+1)..<end {
                 child[i] = parent1[i]
                 takenSlots.append(i)
             }
         }
+
 
         for i in 0..<allCities.count {
             if !child.contains(city: parent2[i]) {
@@ -205,7 +205,7 @@ struct Genetic {
                 }
             }
         }
-
+        //        print("end crossover")
         return child
     }
 
@@ -254,13 +254,23 @@ func parse(file: [String]) {
 
     let genetic = Genetic()
 
-
     var pop = Population(size: allCities.count, initialize: true)
     var tour = pop.getFittest()
-    print("Starting: \(tour.getDistance())")
+    print("Start: \(tour.getDistance())")
 
-    pop = genetic.evolve(population: pop)
+    for i in 0..<5 {
+        pop = genetic.evolve(population: pop)
+        if i % 1 == 0 {
+            tour = pop.getFittest()
+            print("\(i + 1). \(tour.getDistance())")
+        }
+    }
+
+    tour = pop.getFittest()
+    print("End: \(tour.getDistance())")
+
 }
+
 
 let arguments = CommandLine.arguments
 if arguments.count > 1 {
