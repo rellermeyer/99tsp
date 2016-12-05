@@ -1,1 +1,4 @@
-greedy impl in haskell
+Greedy implmentation of TSP.
+
+Run using `make run`.
+Specify test file with `TEST_FILE` variable in Makefile.
