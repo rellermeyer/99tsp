@@ -12,3 +12,5 @@ https://www.quora.com/How-do-you-pass-command-line-arguments-to-a-matlab-script
 
 -- to get # lines in the file --
 https://www.mathworks.com/matlabcentral/newsreader/view_thread/300760
+-- to skip first 6 lines ---
+tail -n +7 a280.tsp
