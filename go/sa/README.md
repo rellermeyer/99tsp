@@ -13,7 +13,6 @@ The following will return a path of Nodes in the shortest distance as a splice o
 
 ## Testing
 - `go build; go test` will run a few tests in the `tspsa_test.go` file 
-
  
  #### Citation
  - http://katrinaeg.com/simulated-annealing.html
