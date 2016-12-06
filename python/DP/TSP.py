@@ -3,7 +3,7 @@ import sys
 import math
 
 
-class City:
+class Node:
 		def __init__(self, num, x, y):
 			self.num = num
 			self.x = x
@@ -84,4 +84,3 @@ def generateDistanceMatrix(nodes):
 def main():
 	nodes = parseTSP(sys.arv[1])
 	opt, path = solveTSP(nodes)
-	
