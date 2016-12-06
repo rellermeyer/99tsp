@@ -15,7 +15,7 @@ The following will return a path of Nodes in the shortest distance as a splice o
 - TODO: `RunSAFromFile(itterations (int), temperature (float64), Mintemp (float64), coolrate (float64), filename (string))`
 
 ## Testing
-- `go test` will run a few tests in the `tspsa_test.go` file
+- `go build;go test` will run a few tests in the `tspsa_test.go` file
 
  
  #### Citation
