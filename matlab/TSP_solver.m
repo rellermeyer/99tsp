@@ -114,6 +114,60 @@ while curNumSubTours > 1
 end
 
 % display the solution %
+Currently have # subtorus = 3
+LP:                Optimal objective value is 2570.071183.                                          
+
+Cut Generation:    Applied 24 Gomory cuts,                                                          
+                   23 strong CG cuts, and 1 zero-half cut.                                          
+                   Lower bound is 2586.458227.                                                      
+
+Branch and Bound:
+
+   nodes     total   num int        integer       relative                                          
+explored  time (s)  solution           fval        gap (%)                                         
+      40     14.86         1   2.589995e+03   1.215368e-01                                          
+      60     15.00         2   2.586770e+03   0.000000e+00                                          
+
+Optimal solution found.
+
+Intlinprog stopped because the objective value is within a gap tolerance of the optimal value, options.TolGapAbs = 0 (the default value). The intcon variables are
+integer within tolerance, options.TolInteger = 1e-05 (the default value).
+
+Currently have # subtorus = 3
+LP:                Optimal objective value is 2570.071183.                                          
+
+Cut Generation:    Applied 14 Gomory cuts,                                                          
+                   17 strong CG cuts, and 4 zero-half cuts.                                         
+                   Lower bound is 2585.865517.                                                      
+
+Branch and Bound:
+
+   nodes     total   num int        integer       relative                                          
+explored  time (s)  solution           fval        gap (%)                                         
+      31     18.48         1   2.589874e+03   1.204559e-01                                          
+      33     18.50         2   2.586770e+03   6.571531e-04                                          
+
+Optimal solution found.
+
+Intlinprog stopped because the objective value is within a gap tolerance of the optimal value, options.TolGapRel = 0.0001 (the default value). The intcon variables
+are integer within tolerance, options.TolInteger = 1e-05 (the default value).
+
+Currently have # subtorus = 4
+LP:                Optimal objective value is 2570.071183.                                          
+
+Cut Generation:    Applied 24 Gomory cuts,                                                          
+                   28 strong CG cuts, and 2 zero-half cuts.                                         
+                   Lower bound is 2586.769648.                                                      
+                   Relative gap is 0.00%.                                                          
+
+
+Optimal solution found.
+
+Intlinprog stopped at the root node because the objective value is within a gap tolerance of the optimal value, options.TolGapAbs = 0 (the default value). The
+intcon variables are integer within tolerance, options.TolInteger = 1e-05 (the default value).
+
+Currently have # subtorus = 1
+        relativegap: 0
 disp(output);
 
 
