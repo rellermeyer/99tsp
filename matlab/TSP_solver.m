@@ -1,14 +1,18 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Travelling Salesman Problem
 % [1] Generate TSP map ( parse the file ) :: parse_to_map
+% [2] generte all possible trips between two pairings of cities
+% [3] calculate distances amongst all of those cities, using hypotheneuse
+% [4] generate equality constraints
+% [5] generate binary variables; their lower and upper bounds {0,1}
+% respectively
+% [6] Solve for the first optimal solution
+% [7] Solve for optimal solution; eliminating subtours in the process
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 filename = 'a280.tsp';
-[lat,long,numCities] = parse_to_map(filename);
-%%
-
-% generate all possible trips ( pairings of locations ) 
-% calulate all trip distances
-
-trips = nchoosek(1:nCities,2); % check if (-1) offset causes any issues ! 
+[citiesLat,citiesLon,nCities] = parse_to_map(filename);
+trips = nchoosek(1:nCities,2); 
 tripDistances = hypot(citiesLat(trips(:,1)) - citiesLat(trips(:,2)), citiesLon(trips(:,1)) - citiesLon(trips(:,2)));
 numTrips = length(tripDistances);
 
@@ -17,20 +21,20 @@ numTrips = length(tripDistances);
 % | tripDistancess ' * x_tsp |
 % | x_tsp | = binary solution vector ( of binary vars ) = tour distance ( we want to minimize ) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % And a set of equality consraints the suffice ( 2 of them )
 % [1] nCities total trips
 % [2] each stop must have two trips attached to it ( 1 in-degree ~= 1 out
 % degree )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constraint #1
 %     |Aeq*x_tsp = beq|
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Aeq = spones(1:length(trips));  % put a way in place of all nCk trips 
+Aeq = spones(1:length(trips));  
 beq = nCities;
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constriant #2
 %     ensure two trips attached @ each stop ONLY
@@ -38,15 +42,15 @@ beq = nCities;
 %     that captures notion of cities*(cities-1) max # stops only, in a
 %     matrix that captures nCities * all possible trips !
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-pairingStopsConstraint = spalloc(nCities, length(trips), nCities*(nCities-1))];
+twoNodesPerCityConstraint = spalloc(nCities, length(trips), nCities*(nCities-1));
 for i = 1:1:nCities
-    tripsIncludingCityI = (trips == i); % find all trips , that include the city 'i'
-    Idxs = sparse(sum(tripsIncludingCityI,2)); % a sum of all node values where city i is @ either end
-    pairingStopsConstraint(i,:) = Idxs';
+    tripsIncludingCity_i = (trips == i); % find all trips , that include the city 'i'
+    indicesofTripsIncludingCity_i = sparse(sum(tripsIncludingCity_i,2)); % sum over each col ... get col vector
+    twoNodesPerCityConstraint(i,:) = indicesofTripsIncludingCity_i';
 end
 numStopsConstraint = 2*ones(nCities,1);
-Aeq = [Aeq;pairingStopsConstraint];
-beq = [beq;numStopsConstraint];
+Aeq = [Aeq;twoNodesPerCityConstraint];
+Beq = [beq;numStopsConstraint];
 
 %%%%%%%% setting bounds for binary variables { 0,1} %%%%%%%%%%%%%%%%%%%%%
 intcon = 1:numTrips; %x(intcon) are integers
@@ -80,20 +84,23 @@ optimal_cost = fval;
 subTours = detectSubtours(x_tsp, trips); % pass trip information ( all possible pairs ) for detection apprpoach
 curNumSubTours = length(subTours);
 fprintf('Currently have # subtours = %d\n', curNumSubTours);
-
+A = spalloc(0,numTrips,0); 
+b = [];
 while curNumSubTours > 1
     % add subtour constraints ( these are inequality constraints {A,b} ) 
     % go every subtour; update data for inequalituy constraints {A,b}
+    B = [b;zeros(curNumSubTours,1)];  
+    A = [A;spalloc(curNumSubTours,numTrips,nCities)];
     for i = 1:curNumSubTours   
         rowIdx = size(A,1) + 1; % counter for indexing ( into matrix A ) 
         subTourTrips = subTours{i}; 
         newTrips = nchoosek(1:length(subTourTrips),2);
         for j = 1:1:length(newTrips)
-            whichVar = (sum(trips = subTourTrips(newTrips(j,1)),2)) & ... 
-                        (sum(trips = subTourTrips(newTrips(j,2)),2));
+            whichVar = (sum(trips == subTourTrips(newTrips(j,1)),2)) & ... 
+                        (sum(trips == subTourTrips(newTrips(j,2)),2));
             A(rowIdx,whichVar) = 1;
          end      
-        B() = length(subTourTrips) - 1; % impose :: one less trip than # trips in subtour
+        B(rowIdx) = length(subTourTrips) - 1; % impose :: one less trip than # trips in subtour
     end
     
     % retry integer-programming optimization approach again
