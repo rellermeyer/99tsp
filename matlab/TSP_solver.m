@@ -85,11 +85,11 @@ subTours = detectSubtours(x_tsp, trips); % pass trip information ( all possible 
 curNumSubTours = length(subTours);
 fprintf('Currently have # subtours = %d\n', curNumSubTours);
 A = spalloc(0,numTrips,0); 
-b = [];
+B = [];
 while curNumSubTours > 1
     % add subtour constraints ( these are inequality constraints {A,b} ) 
     % go every subtour; update data for inequalituy constraints {A,b}
-    B = [b;zeros(curNumSubTours,1)];  
+    B = [B;zeros(curNumSubTours,1)];  
     A = [A;spalloc(curNumSubTours,numTrips,nCities)];
     for i = 1:curNumSubTours   
         rowIdx = size(A,1) + 1; % counter for indexing ( into matrix A ) 
@@ -104,12 +104,12 @@ while curNumSubTours > 1
     end
     
     % retry integer-programming optimization approach again
-    [x_tsp,fval,exitflag,output] = intlinprog(f,intcon,A,b, Aeq,Beq, lb, ub);
+    [x_tsp,fval,exitflag,output] = intlinprog(f,intcon,A,B, Aeq,Beq, lb, ub);
     
     % couint cur number subtours
-    subTours = dertectSubtours(x_tsp, trips);
+    subTours = detectSubtours(x_tsp, trips);
     curNumSubTours = length(subTours);
-    fprintf('Currently have # subtorus = %d\n', curNumSubTours);
+    fprintf('Currently have # subtours = %d\n', curNumSubTours);
     
 end
 
