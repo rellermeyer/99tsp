@@ -33,8 +33,9 @@ numTrips = length(tripDistances);
 % Constraint #1
 %     |Aeq*x_tsp = beq|
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Aeq = spones(1:length(trips));  
+aeq = spones(1:length(trips));  
 beq = nCities;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constriant #2
 %     ensure two trips attached @ each stop ONLY
@@ -49,7 +50,7 @@ for i = 1:1:nCities
     twoNodesPerCityConstraint(i,:) = indicesofTripsIncludingCity_i';
 end
 numStopsConstraint = 2*ones(nCities,1);
-Aeq = [Aeq;twoNodesPerCityConstraint];
+Aeq = [aeq;twoNodesPerCityConstraint];
 Beq = [beq;numStopsConstraint];
 
 %%%%%%%% setting bounds for binary variables { 0,1} %%%%%%%%%%%%%%%%%%%%%
@@ -81,12 +82,15 @@ optimal_cost = fval;
 % we will introduce inequalities to ELIMINIATE subtour constraints
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-subTours = detectSubtours(x_tsp, trips); % pass trip information ( all possible pairs ) for detection apprpoach
+subTours = detectSubtours(x_tsp, trips); % pass trip information ( all possible pairs ) to matlab's subtour detection algo
 curNumSubTours = length(subTours);
 fprintf('Currently have # subtours = %d\n', curNumSubTours);
+
+%%% now to solve the subtour case 
 A = spalloc(0,numTrips,0); 
 B = [];
 while curNumSubTours > 1
+
     % add subtour constraints ( these are inequality constraints {A,b} ) 
     % go every subtour; update data for inequalituy constraints {A,b}
     B = [B;zeros(curNumSubTours,1)];  
