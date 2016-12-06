@@ -6,4 +6,10 @@ Many thanks to http://www.theprojectspot.com/tutorial-post/applying-a-genetic-al
 
 
 USAGE:
-So far, the algorithm itself works but isn't able to parse input files (TODO)
+npm install node
+node main.js [path to input file]
+
+OR 
+
+[Edit make file and set input path]
+make run

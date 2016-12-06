@@ -1,1 +1,3 @@
-run: node tsp.js
+input = ./input/rat99.tsp
+
+run: ; node main.js $(input)

@@ -1,5 +1,6 @@
 class City {
-	constructor (x, y) {
+	constructor (id, x, y) {
+		this.id = id
 		this.x = x
 		this.y = y
 	}
@@ -13,7 +14,7 @@ class City {
 	}
 
 	toString () {
-		return "(" + this.x + ", " + this.y + ")"
+		return this.id + ":(" + this.x + ", " + this.y + ")"
 	}
 }
 
@@ -65,7 +66,7 @@ class Tour {
 
 	includesCity (city) {
 		return (this.cities.filter(function(c) {
-			return (c !== null) && c.x === city.x && c.y === city.y
+			return (c !== null) && c.id === city.id
 		}).length) > 0
 	}
 
@@ -104,7 +105,7 @@ class Tour {
 	}
 
 	toString () {
-		return this.cities.join("->")
+		return this.cities.map(function(c) { return c.id }).join("->")
 	}
 }
 
@@ -250,13 +251,8 @@ class GenAlgorithm {
 	}
 }
 
-
-var coords = [[60, 200], [180, 200], [80, 180], [140, 180], [20, 160], [100, 160], [200, 160], [140, 140], [40, 120], [100, 120], [180, 100], [60, 80], [120, 80], [180, 60], [20, 40], [100, 40], [200, 40], [20, 20], [60, 20], [160, 20]]
-
-var algo = new GenAlgorithm(true)
-
-coords.forEach(function([x, y]) {
-	algo.addCity(new City(x, y))
-})
-
-algo.start()
+module.exports.City = City
+module.exports.Manager = Manager
+module.exports.Tour = Tour
+module.exports.Population = Population
+module.exports.GenAlgorithm = GenAlgorithm
