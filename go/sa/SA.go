@@ -4,6 +4,9 @@ import (
 	"math/rand"
 	"math"
 	"fmt"
+	"io/ioutil"
+	"strings"
+	"strconv"
 )
 
 /*
@@ -22,10 +25,45 @@ func RunSARandom(it int, t float64, tmin float64, c float64, x int, y int, p int
 }
 
 /* TODO
- * Run Simmulated Annealing Algorithm from a given csv file
+ * Run Simmulated Annealing Algorithm from a given XML file
  */
-func RunSAFromFile(s string) {
+func RunSAFromFile(it int, t float64, tmin float64, c float64, f string, v bool) Route {
+	lines, err := readFile(f)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	n := createNodesFromString(lines)
+	return RunSA(it, t, tmin, c, n, v)
+}
+/*
+ * l: splice of strings as lines in a file
+ */
+func createNodesFromString(lines []string) []Node {
+	var r []Node
+	for i := 0; i < len(lines); i++ {
+		l := strings.Fields(lines[i])
+		if len(l) == 3 {
+			x, err1 := strconv.Atoi(l[1])
+			y, err2 := strconv.Atoi(l[2])
+			if err1 == nil && err2 == nil {
+				n := Node{x, y}
+				r = append(r, n)
+			}
+		}
+	}
+	return r
+}
 
+/*
+ * File parsing
+ * f: filename
+ */
+func readFile(f string) ([]string, error) {
+	file, err := ioutil.ReadFile(f)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(string(file), "\n"), nil
 }
 
 /*

@@ -3,6 +3,7 @@ package tspsa
 import (
 	"testing"
 	"fmt"
+	"strconv"
 )
 
 func TestRandom1(t *testing.T) {
@@ -40,6 +41,15 @@ func TestRandom5(t *testing.T) {
 	fmt.Printf("Distance: %.6f\n", n.D)
 	printSep()
 }
+
+func TestFile1(t *testing.T) {
+	printSep()
+	fmt.Println("Testin 6: ")
+	n := RunSAFromFile(1000, 1, 0.00001, 0.003, "a280.tsp", false)
+	fmt.Printf("Distance: %.6f\n", n.D)
+	fmt.Printf("Nodes:" + strconv.FormatInt(int64(len(n.R)), 10) + "\n")
+}
+
 func printSep() {
 	fmt.Println("=============================================")
 }
