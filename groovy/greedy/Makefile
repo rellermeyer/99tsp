@@ -1,0 +1,1 @@
+run: ; groovy TSP.groovy a280.xml
