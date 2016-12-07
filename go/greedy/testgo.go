@@ -4,44 +4,61 @@ import (
 	"fmt"
 	"bufio"
 	"os"
-	"log"
-	// "strings"
-	// "strconv"
+	"strings"
+	"strconv"
+    "math"
 )
 
 func main() {
-    fmt.Println("Hello World!")
+    fmt.Println()
     // Open the file.
-    f, err := os.Open("input/rat99.tsp")
-    if err != nil {
-        log.Fatal(err)
-    }
+    
+    var a [1000]int // x-coordinate
+    var b [1000]int // y-coordinate
+    parseInput(a, b)
+
+
+}
+
+func parseInput(a [1000]int, b [1000]int) {
+    f, _ := os.Open("input/rat99.tsp")
     defer f.Close()
-    // var a []int
-    // var b []int
-    // var str []string
+
     var i = 0
     // Create a new Scanner for the file.
     scanner := bufio.NewScanner(f)
     // Loop over all lines in the file and print them.
     for scanner.Scan() {
-    	line := scanner.Text()
-    	// str = strings.SplitAfter(line, " ")
-    	// test, _ := strconv.Atoi(str[0])
-    	fmt.Println(line)
-    	// if (reflect.TypeOf(test).Kind() == reflect.Int) {
-    	if (i > 5 && line != "EOF") {
-    		fmt.Println("QQQQ")
-			fmt.Println(line)
-			// a[i], _ = strconv.Atoi(str[1])
-			// fmt.Println(a[i])
-			// b[i], _ = strconv.Atoi(str[2])
-			// fmt.Println("B")
-		}
-		i += 1
-		// fmt.Println(line)
+        line := scanner.Text()
+        if (i > 5 && line != "EOF") {
+            str := strings.Fields(line)
+            a[i-5], _ = strconv.Atoi(str[1])
+            b[i-5], _ = strconv.Atoi(str[2])
+        }
+        i += 1
     }
-    if err := scanner.Err(); err != nil {
-        log.Fatal(err)
+    numOfPoints := i - 6 - 1
+    startpoint := 55
+    // fmt.Println(numOfPoints)
+    ab := findNearNeighbor(a, b, numOfPoints, startpoint)
+    fmt.Println("dfewfefe", ab)
+}
+
+func findNearNeighbor(a [1000]int, b [1000]int, num int, start int) int {
+    neighbor := 0
+    smDist := 10000.0
+    for i := 1; i <= num; i++ {
+        if i != start {
+            sqSum := math.Pow(float64(a[i] - a[start]), 2) + math.Pow(float64(b[i] - b[start]), 2)
+            dist := math.Sqrt(sqSum)
+            if dist < smDist {
+                neighbor = i
+                smDist = dist
+            }
+        }
     }
+    fmt.Println(a[start], b[start])
+    fmt.Println(neighbor)
+    fmt.Println(a[neighbor], b[neighbor])
+    return neighbor
 }
