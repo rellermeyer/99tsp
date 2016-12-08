@@ -37,7 +37,7 @@ fun solve(nodes: List<Triple<Int, Int, Int>>) {
         path.add(nearest.second)
         unvisited.remove(nearest.second)
     }
-    println("Distance: " + distance + distance(start, path.last()))
+    println("Distance: " + (distance + distance(start, path.last())))
     path.forEach { println(it.first) }
     println(-1)
 }
