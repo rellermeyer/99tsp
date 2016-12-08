@@ -14,6 +14,8 @@ It takes files in the TSPLIB format
 + n_iters: Number of iterations to run the algorithm
 + radius: Starting radius of the neuron ring 
 
+`-p` adds a solution plot and '-s' will show you the elastic at each iteration
+
 ### Examples
 For help
 ```
