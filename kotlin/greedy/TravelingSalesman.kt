@@ -32,10 +32,10 @@ fun solve(nodes: List<Triple<Int, Int, Int>>) {
     path.add(start)
     unvisited.remove(start) //prune start to manually create path from last node to start
     while (unvisited.isNotEmpty()) {
-        val nearest = nearest(path.last(), unvisited)
-        distance += nearest.first
-        path.add(nearest.second)
-        unvisited.remove(nearest.second)
+        val (nearestDistance, nearest) = nearest(path.last(), unvisited)
+        distance += nearestDistance
+        path.add(nearest)
+        unvisited.remove(nearest)
     }
     println("Distance: " + (distance + distance(start, path.last())))
     path.forEach { println(it.first) }
