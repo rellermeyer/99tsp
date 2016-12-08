@@ -20,10 +20,7 @@ func main() {
 func parseInput() {
 
     // Open the input file.
-    // f, _ := os.Open("input/rat99.tsp")
-    f, _ := os.Open("input/a280.tsp")
-    // f, _ := os.Open("input/pla85900.tsp")
-    // f, _ := os.Open("input/burma14.tsp")
+    f, _ := os.Open(os.Args[1])
     defer f.Close()
 
     // Use a scanner to read lines from the input file.
@@ -67,7 +64,6 @@ func parseInput() {
         }
     }
     findRoute(x, y, arraySize)
-    fmt.Println(arraySize)
 }
 
 // Find the closest point to this point.
@@ -118,8 +114,10 @@ func findRoute(x []float64, y []float64, arraySize int) {
 
 // Print out the solution route, in the format of "LocationNumber-LocationNumber-LocationNumber-...".
 func printResult(solutionRoute []int) {
-    for z := 1; z < len(solutionRoute) - 1; z++ {
+    for z := 1; z < len(solutionRoute); z++ {
         fmt.Print(solutionRoute[z], "-")
     }
-    fmt.Println(solutionRoute[len(solutionRoute) - 1])
+
+    // Prints out the start point because it requires to return to the city started.
+    fmt.Println(solutionRoute[1])
 }
