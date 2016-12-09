@@ -1,4 +1,4 @@
-#Chuqi Zhou (cz4792)
+Chuqi Zhou (cz4792)
 
 This "99 Traveling Salespeople Problem - go version" program finds out the shortest path using greedy algorithm in Go language. It visits every city exactly once and returns to the city you started from.
 
