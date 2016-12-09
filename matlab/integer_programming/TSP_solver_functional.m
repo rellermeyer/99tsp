@@ -1,4 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Travelling Salesman Problem
 % [1] Generate TSP map ( parse the file ) :: parse_to_map
 % [2] generte all possible trips between two pairings of cities
@@ -8,7 +8,8 @@
 % respectively
 % [6] Solve for the first optimal solution
 % [7] Solve for optimal solution; eliminating subtours in the process
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function [solvedResult] = TSP_solver_functional(filename)
 
     fprintf('Currently processing TSP data file %s. \n',filename);
@@ -96,7 +97,7 @@ function [solvedResult] = TSP_solver_functional(filename)
 		% go every subtour; update data for inequalituy constraints {A,b}
 		B = [B;zeros(curNumSubTours,1)];  
 		A = [A;spalloc(curNumSubTours,numTrips,nCities)];
-		for i = 1:curNumSubTours   
+		for i = 1:1:curNumSubTours   
 			rowIdx = size(A,1) + 1; % counter for indexing ( into matrix A ) 
 			subTourTrips = subTours{i}; 
 			newTrips = nchoosek(1:length(subTourTrips),2);
@@ -123,9 +124,10 @@ function [solvedResult] = TSP_solver_functional(filename)
     %%% should be correct up till here !
 
     % GET (lat,lon) data that corresponds to indices of solution
-    actual_long = citiesLat(trips(:,1));
-    actual_lat = citiesLat(trips(:,2));
+    actual_long = citiesLat(actual_paths(:,1));
+    actual_lat = citiesLat(actual_paths(:,2));
     segments = [actual_long; actual_lat];
+    segments = segments';
     dlmwrite('solution.txt',segments,'delimiter','\t');
     solvedResult = segments;
 end
