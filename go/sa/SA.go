@@ -24,8 +24,14 @@ func RunSARandom(it int, t float64, tmin float64, c float64, x int, y int, p int
 	return RunSA(it, t, tmin, c, CreateRandomMAP(x, y, p), v)
 }
 
-/* TODO
- * Run Simmulated Annealing Algorithm from a given XML file
+/* 
+ * Run Simmulated Annealing Algorithm from a given tsp file
+ * it: Itterations
+ * t: temp
+ * tmin: Min Temp
+ * c: Cool Rate
+ * f: File Name
+ * v: Verbose
  */
 func RunSAFromFile(it int, t float64, tmin float64, c float64, f string, v bool) Route {
 	lines, err := readFile(f)
@@ -35,6 +41,7 @@ func RunSAFromFile(it int, t float64, tmin float64, c float64, f string, v bool)
 	n := createNodesFromString(lines)
 	return RunSA(it, t, tmin, c, n, v)
 }
+
 /*
  * l: splice of strings as lines in a file
  */
