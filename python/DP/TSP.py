@@ -68,7 +68,7 @@ def solveTSP(nodes):
 	for k in range(n-1):
 		path.append(previous)
 		bits2 = bits & ~(1 << previous)
-		_, parent = C[(bits, previous)]
+		_, previous = C[(bits, previous)]
 		bits = bits2
 
 	path.append(0)
