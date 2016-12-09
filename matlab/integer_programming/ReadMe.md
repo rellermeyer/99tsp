@@ -12,4 +12,6 @@ Due credit to this tutorial
  [1] enter "echo "TSP_solver_functional('a280.tsp')" | matlab -nosplash -nodesktop , in the command line
 [2] wait, and end results will display
 [3] View results in file "solution.txt"
+    Note :: this is a set of n (longitude,latitude) pairs of city data
+   And there is no particular order. Joining these edges though, should reuslt in the TSP solution
 
