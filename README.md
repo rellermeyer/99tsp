@@ -144,6 +144,8 @@ Bolded languages are pending implementation/examination (Fall 2016).
     * **Genetic**
     * Simulated Annealing
     * **2-Opt**
+* Clingo
+   * Greedy
 * Groovy
     * **Greedy**
 * Go
