@@ -40,12 +40,14 @@ function tsp(g, n)
     path = []
     count = 0
     dist = 0
-    for i in 1:n
+    show = false
+    for i in 1:n-1
         push!(seen, cur)
         push!(path, cur)
         count += 1
         d, cur = get_nearest_unseen(g[cur][2], seen, count, n)
         dist += d
+        show = false
     end
     println(dist)
     println(path)
