@@ -144,6 +144,8 @@ Bolded languages are pending implementation/examination (Fall 2016).
     * **Genetic**
     * Simulated Annealing
     * **2-Opt**
+* Clingo
+   * Greedy
 * Groovy
     * **Greedy**
 * Go
@@ -159,6 +161,8 @@ Bolded languages are pending implementation/examination (Fall 2016).
 * Javascript
     * Greedy
     * **Genetic**
+* Julia
+    * **Greedy**
 * Kotlin
     * **Greedy**
 * Lisp
@@ -178,7 +182,6 @@ Bolded languages are pending implementation/examination (Fall 2016).
 * Ruby
     * Greedy
 * Rust
-    * **Greedy**
     * 2-Opt
 * Scala
     * Greedy
@@ -191,4 +194,4 @@ Bolded languages are pending implementation/examination (Fall 2016).
 * Visual Basic
     * Greedy
 
-Last update: November 30, 2016
+Last update: December 9, 2016

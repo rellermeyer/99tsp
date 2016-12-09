@@ -1,9 +1,9 @@
 import itertools
 import sys
-import math
+from math import hypot
 
 
-class City:
+class Node:
 		def __init__(self, num, x, y):
 			self.num = num
 			self.x = x
@@ -30,7 +30,7 @@ def parseTSP(fileName):
 	for line in file:
 		split = line.split()
 		if len(split) == 3 and all(k.isdigit() for k in split):
-			nodes.append(Node(split[0], float(split[1], float(split[2]))))
+			nodes.append(Node(int(split[0]), float(split[1]), float(split[2])))
 
 	return nodes
 
@@ -40,9 +40,9 @@ def solveTSP(nodes):
 	C = {}
 
 	for k in range (1, n):
-		C[(1 << k, k)] = (dists[0][k], 0)
+		C[(1 << k, k)] = (distMatrix[0][k], 0)
 
-	for s in range (3, n):
+	for s in range(2, n):
 		for subset in itertools.combinations(range(1,n), s):
 			mask = 0
 			for bit in subset:
@@ -55,8 +55,8 @@ def solveTSP(nodes):
 				for elem2 in subset:
 					if elem2 == 0 or elem2 == elem:
 						continue
-					result.append((C[(prev, elem2)][0] + dists[elem2][elem1], elem2))
-				C[(mask, elem1)] = min(result)
+					result.append((C[(prev, elem2)][0] + distMatrix[elem2][elem], elem2))
+				C[(mask, elem)] = min(result)
 
 	bits = (2**n - 1) - 1
 	result = []
@@ -68,20 +68,21 @@ def solveTSP(nodes):
 	for k in range(n-1):
 		path.append(previous)
 		bits2 = bits & ~(1 << previous)
-		_, parent = C[(bits, previous)]
+		_, previous = C[(bits, previous)]
 		bits = bits2
 
 	path.append(0)
 	return opt, list(reversed(path))
 
 def generateDistanceMatrix(nodes):
-	M = []
-
-	for node in nodes:
-		for node2 in nodes:
-			M[node.getNum()][node2.getNum()] = node.getDistance(node2)
+	M = [[node.getDistance(node2) for node in nodes] for node2 in nodes]
+	return M
 
 def main():
-	nodes = parseTSP(sys.arv[1])
+	nodes = parseTSP('a280.tsp')
 	opt, path = solveTSP(nodes)
-	
+	print(opt)
+	print(path)
+
+if __name__ == '__main__':
+	main()
