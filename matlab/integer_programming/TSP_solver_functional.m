@@ -126,6 +126,6 @@ function [solvedResult] = TSP_solver_functional(filename)
     actual_long = citiesLat(trips(:,1));
     actual_lat = citiesLat(trips(:,2));
     segments = [actual_long; actual_lat];
-    disp(segments);
+    dlmwrite('solution.txt',segments,'delimiter','\t');
     solvedResult = segments;
 end

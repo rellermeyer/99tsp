@@ -13,8 +13,7 @@ https://www.quora.com/How-do-you-pass-command-line-arguments-to-a-matlab-script
 
 ------------------------
  How to execute this program
- [1] enter "matlab -nosplash -nodesktop TSP_solver_functional" into the commmand line
-[2] a matlab screen will open up. type the following
-result = TSP_solver_functional('a280.txt');
-display(result);
+ [1] enter "echo "TSP_solver_functional('a280.tsp')" | matlab -nosplash -nodesktop , in the command line
+[2] wait, and end results will display
+[3] View results in file "TSP_solution.txt"
 
