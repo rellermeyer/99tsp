@@ -2,4 +2,4 @@ SRC:=TSP_solver.m
 #TEST_FILE:=a280.tsp
 
 run:
-    matlab -nosplash -nodesktop TSP_solver_functional
+   echo "TSP_solver_functional('a280.tsp')" | matlab -nosplash -nodesktop 

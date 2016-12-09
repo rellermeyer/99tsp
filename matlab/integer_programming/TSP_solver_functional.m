@@ -118,7 +118,14 @@ function [solvedResult] = TSP_solver_functional(filename)
 		
 	end
 
-	% display the solution %
-	disp(output);
-    solvedResult = output;
+    indices_in_trips = find(x_tsp); % get indices, of all nonzero ( 1) elmenets.
+    actual_paths = trips(indices_in_trips,:);
+    %%% should be correct up till here !
+
+    % GET (lat,lon) data that corresponds to indices of solution
+    actual_long = citiesLat(trips(:,1));
+    actual_lat = citiesLat(trips(:,2));
+    segments = [actual_long; actual_lat];
+    disp(segments);
+    solvedResult = segments;
 end
