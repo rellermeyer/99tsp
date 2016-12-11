@@ -1,0 +1,6 @@
+Karthik Bala (kb35949)
+
+Greedy implmentation of TSP.
+
+Run using `make run`.
+Specify test file with `TEST_FILE` variable in Makefile.

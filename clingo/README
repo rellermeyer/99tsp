@@ -1,0 +1,29 @@
+Charles Incorvia (Ci2923)
+
+The traveling salesman problem implemented in Clingo.
+
+Clingo is a declarative programming languaged descened from Prolog.
+
+The clingo implementation is declarative, and thus not exactly the greedy algorithm, but in the background gringo is using greedy algorithms.
+
+In order to run this program, clingo 4.5.4 or later is required.
+
+It's available free here : http://potassco.sourceforge.net/ 
+
+The command to run the program is:
+
+clingo tsp.lp
+
+Clingo does not take inputs from I/O, so all of the information regarding the traveling salesman problem is within the file.
+
+The path() terms indicate the paths from city to city available to the salesman.
+The place() terms are the cities and their names.
+The const t is the number of cities the salesman is planning to visit.
+The first location variable indicates the salesman's starting city.
+
+The program will output UNSATISFIABLE if there's no way to visit all of the cities and return to the home city without visiting any cities twice.
+
+Otherwise, it will output SATISFIABLE and list the steps to the smallest possible path in the form of:
+
+travel(City, Time).
+
