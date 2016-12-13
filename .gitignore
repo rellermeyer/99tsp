@@ -2,3 +2,4 @@ data
 *.class
 *~
 *.swp
+.DS_Store
