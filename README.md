@@ -27,12 +27,12 @@ The following variations of the Traveling Salesman problem are currently
 available in this repository.
 
 * Greedy (greedy)
-* ~~Linear Programming (lp)~~ (no one has done 1 yet)
+* Linear Programming (lp)
 * Simulated Annealing (sa)
 * Genetic (gen)
-* ~~Neural Network (neural)~~ (no one has done 1 yet)
+* Neural Network (neural)
 * 2-Opt (2opt)
-* ~~Dynamic Programming~~ (pending implementations)
+* Dynamic Programming
 
 If more implementations are added, this list will be added to as well.
 Below are short descriptions of each implementation method. Note that the 
@@ -134,42 +134,40 @@ repository.
 
 Bolded languages are pending implementation/examination (Fall 2016).
 
-* R
-    * Greedy
 * C
     * Greedy
     * Simulated Annealing
 * C++
     * Greedy
-    * **Genetic**
     * Simulated Annealing
-    * **2-Opt**
 * Clingo
-   * Greedy
-* Groovy
-    * **Greedy**
+    * Greedy
 * Go
-    * **Greedy**
-    * **Simulated Annealing**
+    * Greedy
+    * Simulated Annealing
+* Groovy
+    * Greedy
 * Haskell
-    * **Greedy**
+    * Greedy
 * Java
     * Greedy
-    * **Simulated Annealing**
-    * **Dynamic Programming**
-    * **2-Opt**
+    * Simulated Annealing
+    * Dynamic Programming
 * Javascript
     * Greedy
-    * **Genetic**
+    * Genetic
 * Julia
-    * **Greedy**
+    * Greedy
 * Kotlin
-    * **Greedy**
+    * Greedy
 * Lisp
-    * **Greedy**
+    * Greedy
 * Matlab
-    * **Greedy**
+    * Linear (Integer) Programming
+    * Greedy
 * Objective C
+    * Greedy
+* Perl
     * Greedy
 * Prolog
     * Simulated Annealing
@@ -177,8 +175,11 @@ Bolded languages are pending implementation/examination (Fall 2016).
     * Greedy
     * Genetic
     * Simulated Annealing
-    * **Neural Network**
+    * Neural
     * 2-Opt
+    * Dynamic Programming
+* R
+    * Greedy
 * Ruby
     * Greedy
 * Rust
@@ -187,11 +188,10 @@ Bolded languages are pending implementation/examination (Fall 2016).
     * Greedy
     * Genetic
 * Swift
-    * **Greedy**
-    * **Genetic**
+    * Genetic
 * Verilog
     * Simulated Annealing
 * Visual Basic
     * Greedy
 
-Last update: December 9, 2016
+Last update: January 2, 2017
