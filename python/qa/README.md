@@ -1,11 +1,4 @@
-Matheus Lima (Computer Science, Federal University of Sao Carlos, Brazil)
-
-(1) To run:
-
-$ ./run.sh
-
-(2) To change the path of the TSP data file: change the path in the Makefile.
-
+Matheus Lima (Computer Science, Federal University of Sao Carlos, Brazil
 
 # Quantitative Algorithm to solve the TSP problem
 
